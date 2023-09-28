@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <math.h>
+
+enum triangle {equilateral,isosceles,scalene};
+typedef enum triangle triangle;
+
+triangle type(int a, int b, int c){
+    if(a == b && b == c){
+	return equilateral;
+    }+
+    else if(a == b || a == c || b == c){
+	return isosceles;
+    }
+    else{
+	return scalene;
+    }
+}
+
+bool h_calc(int h, int o, int a){
+    h_r = pow((pow(a,2) + pow(o,2)),0.5);
+    if(h_r == h{
+        return true;
+    }
+    return false;
+}
+
+
+
+bool r-angle(int a, int b, int c){
+    if(a > b && a > c){
+	return h_calc(int a, int b, int c);
+    }
+    if(b > a && b > c){
+	return h_calc(int b, int a, int c);
+    }
+    if(c > a && c > b){
+	return h_calc(int c, int b, int a);
+    }
+}
+
+void test(){
+    assert(type(3,3,3) == equilateral)
+    aa
+
+
+
+}
