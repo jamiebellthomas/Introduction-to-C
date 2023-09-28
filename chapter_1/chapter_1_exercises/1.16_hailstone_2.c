@@ -5,11 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 // If the number of sequences gets too high (over 10000ish), we run out of memory? (Program stops)
-#define SEQ_MAX 1000
+#define SEQ_MAX 10000000
 int main(){
     // Not sure if is is necessary but we'll use sine typedef's to divide our variables into local ones (applied to each sequence) and global ones
-    typedef int global;
-    typedef int local;
+    typedef long global;
+    typedef long local;
     global longest_seq_global = 0, longest_seq_init=0, largest_num_global=0, largest_num_init=0;
     local x, x_init, largest_number_local, iterations;
     // What makes this code significant is its the while loop from 1.15 within a for loop that runs for a range of initial values
@@ -37,17 +37,17 @@ int main(){
 	    largest_num_global = largest_number_local;
 	    largest_num_init = x_init;
 	}
-	if(iterations > largest_num_init){
+	if(iterations > longest_seq_global){
 	    longest_seq_global = iterations;
 	    longest_seq_init = x_init;
         }
     }
     printf("\nRANGE: 1-%i\n\n",SEQ_MAX);
     printf("LONGEST SEQUENCE\n");
-    printf("Initial Value: %i\n",longest_seq_init);
-    printf("Sequence Length: %i\n\n", longest_seq_global);
+    printf("Initial Value: %li\n",longest_seq_init);
+    printf("Sequence Length: %li\n\n", longest_seq_global);
     printf("LARGEST VALUE\n");
-    printf("Initial Value: %i\n",largest_num_init);
-    printf("Value: %i\n", largest_num_global);
+    printf("Initial Value: %li\n",largest_num_init);
+    printf("Value: %li\n", largest_num_global);
 }
 
