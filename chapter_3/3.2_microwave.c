@@ -16,13 +16,13 @@ int main(void){
     General strategy is to take in a time and keep taking off the denominations in the mist efficent way until time is less than zero
     */
     int time = 0, times[NO_SETTINGS] = {600,60,10}, cook_instructions[NO_SETTINGS] = {0,0,0};
-    int* p_time = &time;
+    int *p_time = &time;
     printf("How long are you cooking for?\n");
     scanf("%i",&time);
     // There is no simple way to sort an array (need a sort algorithm) so for now we'll just assume increments are entered in descending order
     while(time > 0){
 	printf("%i\n",time);
-	next_value(times, &time, cook_instructions);
+	next_value(times, p_time , cook_instructions);
     }
     printf("%i, %i, %i\n", cook_instructions[0], cook_instructions[1], cook_instructions[2]);
 }
