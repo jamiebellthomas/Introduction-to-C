@@ -7,5 +7,8 @@ microwave: 3.2_microwave.c
 music: 3.3_music.c
 	$(CC) $(CFLAGS) 3.3_music.c -o 3.3_music.bin -lm
 
+yahtzee: 3.4_yahtzee.c
+	$(CC) $(CFLAGS) 3.4_yahtzee.c -o 3.4_yahtzee.bin -lm
+
 clean:
 	rm *.bin
