@@ -3,15 +3,16 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdbool.h>
- //Prototypes
+#define ALPHA_SHIFT 25
+//Prototypes
 int alpha_position(int letter, bool upper);
 int conversion(int position);
 int ascii_position(int position, bool upper);
 
 int alpha_position(int letter, bool upper){
-    /*
-    Will convert a letter of either case to its alphabet index 
-    */
+/*
+Will convert a letter of either case to its alphabet index 
+*/
     unsigned pos;
     if (upper){
 	pos = letter - 'A';
@@ -23,10 +24,10 @@ int alpha_position(int letter, bool upper){
 }
 
 
-int conversion(int position){
+int secret(int position){
     // This function flips the alphabet indicies 
     unsigned new_pos;
-    new_pos = 25 - position;
+    new_pos = ALPHA_SHIFT - position;
     return new_pos;
 }
 
@@ -50,7 +51,7 @@ void test(){
     assert(alpha_position('A',true) == 0);
     assert(alpha_position('x',false) == 23);
     assert(alpha_position('x',false) == alpha_position('X',true));
-    assert(conversion(5) == 20);
+    assert(secret(5) == 20);
     assert(ascii_position(19,false) == 't');
     assert(ascii_position(19,true) == 'T');
 
@@ -70,11 +71,12 @@ int main(void){
 	    // Determine if its upper case then call the respective functions as appropriately 
 	    upper = isupper(a);
 	    a = alpha_position(a, upper);
-	    a = conversion(a);
+	    a = secret(a);
 	    a = ascii_position(a, upper);
 	}
-    // Return info
-    printf("%c",a);
+        // Return info
+        printf("%c",a);
     }
+    printf("\n");
 
 }
