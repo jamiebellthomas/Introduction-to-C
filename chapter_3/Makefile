@@ -16,8 +16,8 @@ yahtzee: 3.4_yahtzee.c
 test: test.c
 	$(CC) $(CFLAGS) test.c -o test.bin -lm
 
-1102: 3.5_110_2.c
-	$(CC) $(CFLAGS) 3.5_110_2.c -o 3.5_110_2.bin -lm
+darts: 3.6_darts.c
+	$(CC) $(CFLAGS) 3.6_darts.c -o 3.6_darts.bin -lm
 
 clean:
 	rm *.bin
