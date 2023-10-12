@@ -18,8 +18,12 @@ typedef struct board {
 
 
 // Maybe some of your own function prototypes here
+
+
 // REMOVE THIS LATER - PRINT ISNT BEING SUBMITTED - ONLY THERE FOR DEBUG PURPOSES LALLALALALALALALALALALALALALALALALALALALALALALLALAALAL
 //void print_2D_array(int array[MAXSQ][MAXSQ], int height, int width);
+
+
 
 int is_char_in_string(char c, char string);
 int legal_char_checker(char inp[MAXSQ*MAXSQ+1]);
@@ -33,7 +37,9 @@ board solve_board(board b)
 void board2str(char s[MAXSQ*MAXSQ+1], board b)
 {
 }
-
+/* -----------
+ SYNTAX CHECKER
+----------------*/
 bool syntax_check(unsigned totmines, unsigned width, unsigned height, char inp[MAXSQ*MAXSQ+1]){
     if(legal_char_checker(inp)&&
        correct_no_of_mines(inp, totmines)&&
@@ -46,7 +52,7 @@ bool syntax_check(unsigned totmines, unsigned width, unsigned height, char inp[M
 int legal_char_checker(char inp[MAXSQ*MAXSQ+1]){
     const char legal_chars[LEGAL_CHAR_COUNT+1] = "012345678?X";
     for(int c = 0 ; c<(int)strlen(inp) ; c++){
-        if(strchr(&legal_chars, inp[c]) == NULL){
+        if(strchr(legal_chars, inp[c]) == NULL){
             return 0;
         }
     }
@@ -74,7 +80,9 @@ int correct_str_len(unsigned width, unsigned height, char inp[MAXSQ*MAXSQ+1]){
     }
     return 0;
 }
-
+/* -----------
+ GRID CREATION
+----------------*/
 board make_board(int totmines, int width, int height, char inp[MAXSQ*MAXSQ+1]){
     board new_board;
     new_board.w = width;
@@ -101,6 +109,10 @@ void print_2D_array(int array[MAXSQ][MAXSQ], int height, int width){
 }
 */
 
+
+/* -----------
+ TESTING
+----------------*/
 void test(void){
     unsigned test_totmines = 1, test_width = 5, test_height = 5; 
     char test_inp[MAXSQ*MAXSQ+1] = "000000111001X100111000000";
