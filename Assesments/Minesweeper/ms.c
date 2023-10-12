@@ -29,6 +29,7 @@ int is_char_in_string(char c, char string);
 int legal_char_checker(char inp[MAXSQ*MAXSQ+1]);
 int correct_no_of_mines(char inp[MAXSQ*MAXSQ+1], unsigned totmines);
 int correct_str_len(unsigned width, unsigned height, char inp[MAXSQ*MAXSQ+1]);
+board init_board(int totmines, int width, int height);
 
 board solve_board(board b)
 {
@@ -37,6 +38,7 @@ board solve_board(board b)
 void board2str(char s[MAXSQ*MAXSQ+1], board b)
 {
 }
+
 /* -----------
  SYNTAX CHECKER
 ----------------*/
@@ -84,10 +86,7 @@ int correct_str_len(unsigned width, unsigned height, char inp[MAXSQ*MAXSQ+1]){
  GRID CREATION
 ----------------*/
 board make_board(int totmines, int width, int height, char inp[MAXSQ*MAXSQ+1]){
-    board new_board;
-    new_board.w = width;
-    new_board.h = height;
-    new_board.totmines = totmines;
+    board new_board = init_board(totmines,width,height);
     short str_cell_index;
     for(int i = 0;i < height;i++){
         for(int j = 0;j < width;j++){
@@ -96,6 +95,14 @@ board make_board(int totmines, int width, int height, char inp[MAXSQ*MAXSQ+1]){
 	    new_board.grid[i][j] = inp[str_cell_index];
         }
     }
+    return new_board;
+}
+
+board init_board(int totmines, int width, int height){
+    board new_board = {.w = width,
+                       .h = height,
+                       .totmines = totmines,
+                       .grid = {{0}}};
     return new_board;
 }
 /*
@@ -114,19 +121,36 @@ void print_2D_array(int array[MAXSQ][MAXSQ], int height, int width){
  TESTING
 ----------------*/
 void test(void){
-    unsigned test_totmines = 1, test_width = 5, test_height = 5; 
+    // Test variables initialisation
+    unsigned test_totmines = 1, test_width = 5, test_height = 5, row, col; 
     char test_inp[MAXSQ*MAXSQ+1] = "000000111001X100111000000";
     char test_inp_bad[MAXSQ*MAXSQ+1] = "0000001l1001XX0011100000";
-    board test_board = make_board(test_totmines, test_width, test_height, test_inp);
-    //print_2D_array(test_board.grid, test_board.h, test_board.w);
-    for(unsigned row = 0;row < test_height;row++){
-        for(unsigned col = 0;col < test_width;col++){
+
+    // Board creation tests
+
+    board test_board = init_board(test_totmines, test_width, test_height);
+    assert(test_board.totmines == 1);
+    assert(test_board.w == 5);
+    assert(test_board.h == 5);
+    // Check all values in te initialised grid are zero
+    for(row = 0;row < test_height;row++){
+        for(col = 0;col < test_width;col++){
+            assert(test_board.grid[row][col] == 0);
+        }
+    }
+
+    test_board = make_board(test_totmines, test_width, test_height, test_inp);
+    for(row = 0;row < test_height;row++){
+        for(col = 0;col < test_width;col++){
 	    // Assert that each value in the new
 	    // grid is the same as its positional
 	    // counter-part in the input string.
             assert(test_board.grid[row][col] == test_inp[col + row*test_width]);
         }
     }
+
+    // Syntax checker tests
+
     assert(legal_char_checker(test_inp) == 1);
     assert(legal_char_checker(test_inp_bad) == 0);
     assert(correct_no_of_mines(test_inp, 1) == 1);
