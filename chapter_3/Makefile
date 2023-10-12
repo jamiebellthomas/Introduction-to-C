@@ -19,5 +19,8 @@ test: test.c
 darts: 3.6_darts.c
 	$(CC) $(CFLAGS) 3.6_darts.c -o 3.6_darts.bin -lm
 
+palindrome: 3.10_palindrome.c
+	$(CC) $(CFLAGS) 3.10_palindrome.c -o 3.10_palindrome.bin -lm
+
 clean:
 	rm *.bin
