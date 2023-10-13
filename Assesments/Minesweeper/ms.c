@@ -1,27 +1,11 @@
 #include "ms.h"
 #define LEGAL_CHAR_COUNT 11
-/*
-#define MAXSQ 10
-typedef struct board {
-   int grid[MAXSQ][MAXSQ];
-   int w;
-   int h;
-   int totmines;
-} board;
-
-#define UNK  '?'
-#define MINE 'X'
-*/
-
-
-
-
 
 // Maybe some of your own function prototypes here
 
 
 // REMOVE THIS LATER - PRINT ISNT BEING SUBMITTED - ONLY THERE FOR DEBUG PURPOSES LALLALALALALALALALALALALALALALALALALALALALALALLALAALAL
-//void print_2D_array(int array[MAXSQ][MAXSQ], int height, int width);
+void print_2D_array(int array[MAXSQ][MAXSQ], int height, int width);
 
 
 
@@ -34,9 +18,17 @@ board init_board(int totmines, int width, int height);
 board solve_board(board b)
 {
 }
-
-void board2str(char s[MAXSQ*MAXSQ+1], board b)
-{
+/* -----------
+ BOARD -> STRING
+----------------*/
+void board2str(char s[MAXSQ*MAXSQ+1], board b){
+    short str_cell_index;
+    for(short row = 0;row < b.h ;row++){
+	for(short col = 0; col<b.w ; col++){
+            str_cell_index = col + (b.w)*row;
+            s[str_cell_index] = b.grid[row][col];
+        }
+    }
 }
 
 /* -----------
@@ -88,11 +80,11 @@ int correct_str_len(unsigned width, unsigned height, char inp[MAXSQ*MAXSQ+1]){
 board make_board(int totmines, int width, int height, char inp[MAXSQ*MAXSQ+1]){
     board new_board = init_board(totmines,width,height);
     short str_cell_index;
-    for(int i = 0;i < height;i++){
-        for(int j = 0;j < width;j++){
+    for(int row = 0;row < height;row++){
+        for(int col = 0;col < width;col++){
 	    // Translates a 2-dimensional index to 1-dimensional space
-	    str_cell_index = j + width*i;
-	    new_board.grid[i][j] = inp[str_cell_index];
+	    str_cell_index = col + width*row;
+	    new_board.grid[row][col] = inp[str_cell_index];
         }
     }
     return new_board;
@@ -105,7 +97,7 @@ board init_board(int totmines, int width, int height){
                        .grid = {{0}}};
     return new_board;
 }
-/*
+
 void print_2D_array(int array[MAXSQ][MAXSQ], int height, int width){
     for(int row = 0;row < height;row++){
         for(int col = 0;col < width;col++){
@@ -114,7 +106,7 @@ void print_2D_array(int array[MAXSQ][MAXSQ], int height, int width){
 	printf("\n");
     }
 }
-*/
+
 
 
 /* -----------
@@ -122,7 +114,7 @@ void print_2D_array(int array[MAXSQ][MAXSQ], int height, int width){
 ----------------*/
 void test(void){
     // Test variables initialisation
-    unsigned test_totmines = 1, test_width = 5, test_height = 5, row, col; 
+    unsigned test_totmines = 1, test_width = 5, test_height = 5, row, col;
     char test_inp[MAXSQ*MAXSQ+1] = "000000111001X100111000000";
     char test_inp_bad[MAXSQ*MAXSQ+1] = "0000001l1001XX0011100000";
 
@@ -159,4 +151,9 @@ void test(void){
     assert(correct_str_len(test_width, test_height, test_inp_bad) == 0);
     assert(syntax_check(test_totmines, test_width, test_height, test_inp) == true);
     assert(syntax_check(test_totmines, test_width, test_height, test_inp_bad) == false);
+
+    // board2str check.
+
+    board2str(test_inp_bad, test_board);
+    assert(strcmp(test_inp_bad,test_inp) == 0);
 }
