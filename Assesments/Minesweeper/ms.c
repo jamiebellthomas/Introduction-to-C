@@ -15,9 +15,41 @@ int correct_no_of_mines(char inp[MAXSQ*MAXSQ+1], unsigned totmines);
 int correct_str_len(unsigned width, unsigned height, char inp[MAXSQ*MAXSQ+1]);
 board init_board(int totmines, int width, int height);
 
-board solve_board(board b)
-{
+/* -----------
+ Board Solver
+----------------*/
+
+board solve_board(board b){ 
+    /*
+	This function neeeds to be able to apply rule#1 % #2 and return the solved board if possible.
+	If not possible it needs to return the partially solved board in grid format so it can be
+	be coverted by board2str to a string.
+
+	We need to work out what each rull will do and how they'll be applied.
+
+	I'm thinking that initially we make 2 functions, solve_rule_1 and solve_rule_2 and see what effect these have on input grids
+
+	Thes functions will need to be called repeatedly until there are no more changes to the boards
+    */
 }
+
+board solve_rule_1(){
+    /*This rule simply says if all the mines have been discovered then you
+    can fill in the remaining values based off the mines with its proximity*/
+    // This function requires a sub function that determines the number of discovered mines,
+    // this could potentially be linked into the correct_no_of_mines checker
+
+    // We'll also need a function that can determines corret number to go into unknown squares based off neighbouring squares
+}
+board solve_rule_2(){
+    /*This is a tad more complicated. For a KNOWN square, if the number of known mines + number of unknown mines = number on tile
+    you can fill in those unknown squares as mines*/
+    // I think we need a function that can analyse surrounding squares and return a string of surrounding squares for analysis. 
+    // This needs to work for boarder squares too
+    //I'm going to write out a full architecture for these functions on my IPad
+}
+
+
 /* -----------
  BOARD -> STRING
 ----------------*/
