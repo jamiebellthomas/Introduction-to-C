@@ -1,5 +1,6 @@
 #include "ms.h"
 #define LEGAL_CHAR_COUNT 11
+#define MAX_ADJACENT 8
 
 // Maybe some of your own function prototypes here
 
@@ -8,18 +9,23 @@
 void print_2D_array(int array[MAXSQ][MAXSQ], int height, int width);
 
 
+struct cell {char adjacent[MAX_ADJACENT+1]; char value;};
+typedef struct cell cell;
+
 
 int is_char_in_string(char c, char string);
 int legal_char_checker(char inp[MAXSQ*MAXSQ+1]);
-int correct_no_of_mines(char inp[MAXSQ*MAXSQ+1], unsigned totmines);
+unsigned mine_counter(char inp[MAXSQ*MAXSQ+1]);
 int correct_str_len(unsigned width, unsigned height, char inp[MAXSQ*MAXSQ+1]);
 board init_board(int totmines, int width, int height);
+cell cell_info(board b, int row, int col);
+char replacement_value(cell c);
 
 /* -----------
  Board Solver
 ----------------*/
 
-board solve_board(board b){ 
+board solve_board(board b){
     /*
 	This function neeeds to be able to apply rule#1 % #2 and return the solved board if possible.
 	If not possible it needs to return the partially solved board in grid format so it can be
@@ -40,13 +46,40 @@ board solve_rule_1(){
     // this could potentially be linked into the correct_no_of_mines checker
 
     // We'll also need a function that can determines corret number to go into unknown squares based off neighbouring squares
+
+    // This is a boardwide function therefore it should only be applied twice, once at the start and once at the end. If it doesn't solve it
+    // in either of these calls, its not solveable with these rules
+    
 }
+
+
 board solve_rule_2(){
     /*This is a tad more complicated. For a KNOWN square, if the number of known mines + number of unknown mines = number on tile
     you can fill in those unknown squares as mines*/
-    // I think we need a function that can analyse surrounding squares and return a string of surrounding squares for analysis. 
-    // This needs to work for boarder squares too
-    //I'm going to write out a full architecture for these functions on my IPad
+    // We need to devise a method of looking at adjacent cells, considering edge and corner cells. Central squares will 8 neighbours
+    // Edges have 5 and corners have 3.
+    // This function is applied on a cell by cell basis, apply it iteratively until there is no difference between iterations.
+}
+
+cell cell_info(board b, int row, int col){
+    cell current_cell = {.value = b.grid[row][col],
+                       .adjacent = {'0'}};
+    int i,j, neighbours = 0;
+    for(i = -1;i <= 1;i++){
+        for(j = -1;j <= 1;j++){
+            if((row+i)<b.h && (row+i)>=0 && (col+j)<b.w && (col+j)>=0 && ((i != 0) || (j != 0))){
+                current_cell.adjacent[neighbours++] = b.grid[row+i][col+j];
+            }
+        }
+    }
+    return current_cell;
+}
+
+char replacement_value(cell c){
+    unsigned mine_count;
+    mine_count = mine_counter(c.adjacent);
+    mine_count += '0';
+    return mine_count;
 }
 
 
@@ -67,16 +100,18 @@ void board2str(char s[MAXSQ*MAXSQ+1], board b){
  SYNTAX CHECKER
 ----------------*/
 bool syntax_check(unsigned totmines, unsigned width, unsigned height, char inp[MAXSQ*MAXSQ+1]){
-    if(legal_char_checker(inp)&&
-       correct_no_of_mines(inp, totmines)&&
-       correct_str_len(width, height, inp)){
-        return true;
+    if(legal_char_checker(inp) && correct_str_len(width, height, inp)){
+        unsigned mine_count;
+        mine_count = mine_counter(inp);
+        if(mine_count <= totmines){
+            return true;
+        }
     }
     return false;
 }
 
 int legal_char_checker(char inp[MAXSQ*MAXSQ+1]){
-    const char legal_chars[LEGAL_CHAR_COUNT+1] = "012345678?X";
+    char legal_chars[LEGAL_CHAR_COUNT+1] = "012345678?X";
     for(int c = 0 ; c<(int)strlen(inp) ; c++){
         if(strchr(legal_chars, inp[c]) == NULL){
             return 0;
@@ -85,17 +120,14 @@ int legal_char_checker(char inp[MAXSQ*MAXSQ+1]){
     return 1;
 }
 
-int correct_no_of_mines(char inp[MAXSQ*MAXSQ+1], unsigned totmines){
-    unsigned mine_counter = 0;
+unsigned mine_counter(char inp[MAXSQ*MAXSQ+1]){
+    unsigned mine_count = 0;
     for(int c = 0 ; c<(int)strlen(inp) ; c++){
         if(inp[c] == MINE){
-            ++mine_counter;
+            ++mine_count;
         }
     }
-    if(mine_counter <= totmines){
-        return 1;
-    }
-    return 0;
+    return mine_count;
 }
 
 int correct_str_len(unsigned width, unsigned height, char inp[MAXSQ*MAXSQ+1]){
@@ -177,8 +209,8 @@ void test(void){
 
     assert(legal_char_checker(test_inp) == 1);
     assert(legal_char_checker(test_inp_bad) == 0);
-    assert(correct_no_of_mines(test_inp, 1) == 1);
-    assert(correct_no_of_mines(test_inp_bad, 1) == 0);
+    assert(mine_counter(test_inp) == 1);
+    assert(mine_counter(test_inp_bad) == 2);
     assert(correct_str_len(test_width, test_height, test_inp) == 1);
     assert(correct_str_len(test_width, test_height, test_inp_bad) == 0);
     assert(syntax_check(test_totmines, test_width, test_height, test_inp) == true);
@@ -188,4 +220,23 @@ void test(void){
 
     board2str(test_inp_bad, test_board);
     assert(strcmp(test_inp_bad,test_inp) == 0);
+
+    // Cell struct and replacement values
+
+    cell test_cell;
+    test_cell = cell_info(test_board,0,0);
+    assert(strcmp(test_cell.adjacent, "001") == 0);
+
+    test_cell = cell_info(test_board,0,1);
+    //printf("%s",test_cell.adjacent);
+    assert(strcmp(test_cell.adjacent, "00011") == 0);
+
+    test_cell = cell_info(test_board,0,2);
+    assert(strcmp(test_cell.adjacent, "00111") == 0);
+
+    test_cell = cell_info(test_board,1,1);
+    assert(strcmp(test_cell.adjacent, "0000101X") == 0);
+    char test_replacement;
+    test_replacement = replacement_value(test_cell);
+    assert(test_replacement == '1');
 }
