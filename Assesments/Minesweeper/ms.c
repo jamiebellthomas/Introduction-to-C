@@ -39,17 +39,22 @@ board solve_board(board b){
     */
 }
 
-board solve_rule_1(){
-    /*This rule simply says if all the mines have been discovered then you
-    can fill in the remaining values based off the mines with its proximity*/
-    // This function requires a sub function that determines the number of discovered mines,
-    // this could potentially be linked into the correct_no_of_mines checker
-
-    // We'll also need a function that can determines corret number to go into unknown squares based off neighbouring squares
-
-    // This is a boardwide function therefore it should only be applied twice, once at the start and once at the end. If it doesn't solve it
-    // in either of these calls, its not solveable with these rules
-    
+board solve_rule_1(board b){
+    unsigned mine_count;
+    char flat_grid[MAXSQ*MAXSQ+1];
+    board2str(flat_grid, b);
+    mine_count = mine_counter(flat_grid);
+    if((int)mine_count == b.totmines){
+        for(int row = 0;row < b.h;row++){
+            for(int col = 0;col < b.w;col++){
+ 		if(b.grid[row][col] == UNK){
+                    cell cell_details = cell_info(b,row,col);
+                    b.grid[row][col] = replacement_value(cell_details);
+                }
+            }
+        }
+    }
+    return b;
 }
 
 
@@ -239,4 +244,12 @@ void test(void){
     char test_replacement;
     test_replacement = replacement_value(test_cell);
     assert(test_replacement == '1');
+
+    // solve rule 1 tests
+    char test_inp2[MAXSQ*MAXSQ+1] = "000000?11001X100?1?000000";
+    board test_board2 = make_board(1, 5, 5, test_inp2);
+    test_board2 = solve_rule_1(test_board2);
+    print_2D_array(test_board2.grid,5,5);
+    board2str(test_inp2, test_board2);
+    assert(strcmp(test_inp2,test_inp) == 0);
 }

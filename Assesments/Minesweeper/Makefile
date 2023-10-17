@@ -17,3 +17,6 @@ clean:
 
 run: all
 	./ms
+
+mssan: ms.c drv.c ms.h
+	gcc ms.c drv.c -g3 -fsanitize=undefined -fsanitize=address -o mssan
