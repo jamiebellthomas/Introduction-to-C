@@ -12,8 +12,8 @@ void print_2D_array(int array[MAXSQ][MAXSQ], int height, int width);
 struct cell {char adjacent[MAX_ADJACENT+1]; char value;};
 typedef struct cell cell;
 
-
-int is_char_in_string(char c, char string);
+unsigned unk_counter(char s[MAX_ADJACENT+1]);
+board unk_replacement(board b, int row, int col);
 int legal_char_checker(char inp[MAXSQ*MAXSQ+1]);
 unsigned mine_counter(char inp[MAXSQ*MAXSQ+1]);
 int correct_str_len(unsigned width, unsigned height, char inp[MAXSQ*MAXSQ+1]);
@@ -58,12 +58,25 @@ board solve_rule_1(board b){
 }
 
 
-board solve_rule_2(){
+board solve_rule_2(board b){
     /*This is a tad more complicated. For a KNOWN square, if the number of known mines + number of unknown mines = number on tile
     you can fill in those unknown squares as mines*/
     // We need to devise a method of looking at adjacent cells, considering edge and corner cells. Central squares will 8 neighbours
     // Edges have 5 and corners have 3.
     // This function is applied on a cell by cell basis, apply it iteratively until there is no difference between iterations.
+    for(int row = 0;row<b.h;row++){
+        for(int col = 0;col<b.w;col++){
+            if(isdigit(b.grid[row][col])){
+                unsigned unk_plus_mine = 0;
+                cell cell_details = cell_info(b,row,col);
+                unk_plus_mine = unk_counter(cell_details.adjacent) + mine_counter(cell_details.adjacent);
+                if(unk_plus_mine == (unsigned)(b.grid[row][col])){
+                    unk_replacement(b,row,col);
+                }
+            }
+        }
+    }
+    return b;
 }
 
 cell cell_info(board b, int row, int col){
@@ -87,6 +100,31 @@ char replacement_value(cell c){
     return mine_count;
 }
 
+unsigned unk_counter(char s[MAX_ADJACENT+1]){
+    unsigned counter = 0;
+    for(int i = 0;i<MAX_ADJACENT;i++){
+        if(s[i]==UNK){
+            ++counter;
+        }
+    }
+    return counter;
+}
+
+board unk_replacement(board b, int row, int col){
+    int i,j;
+        for(i = -1;i <= 1;i++){
+            for(j = -1;j <= 1;j++){
+                printf("%i,%i\n",(row+i),(col+j));
+                if((row+i)<b.h && (row+i)>=0 && (col+j)<b.w && (col+j)>=0){
+                    if(b.grid[row+i][col+i] == UNK){
+                        printf("%c at row:%i col:%i\n",b.grid[row+i][col+i],(row+i),(col+j));
+                        b.grid[row+i][col+i] = MINE;
+                    }
+                }
+            }
+        }
+    return b;
+}
 
 /* -----------
  BOARD -> STRING
@@ -249,7 +287,20 @@ void test(void){
     char test_inp2[MAXSQ*MAXSQ+1] = "000000?11001X100?1?000000";
     board test_board2 = make_board(1, 5, 5, test_inp2);
     test_board2 = solve_rule_1(test_board2);
-    print_2D_array(test_board2.grid,5,5);
     board2str(test_inp2, test_board2);
     assert(strcmp(test_inp2,test_inp) == 0);
+
+    // solve rule 2 tests
+    char test_inp3[MAXSQ*MAXSQ+1] = "000000?11001X100?1?0";
+    board test_board3 = make_board(1, 5, 4, test_inp3);
+    test_cell = cell_info(test_board3,3,2);
+    assert(unk_counter(test_cell.adjacent) == 2);
+    solve_rule_2(test_board3);
+
+    board test_unkr_board = {.w = 3,
+                       .h = 3,
+                       .totmines = 6,
+                       .grid = {{'?','?','2'},{'X','6','X'},{'?','?','2'}}};
+    test_unkr_board = unk_replacement(test_unkr_board, 1, 1);
+    print_2D_array(test_unkr_board.grid,3,3);
 }
