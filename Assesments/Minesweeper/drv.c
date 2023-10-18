@@ -3,7 +3,7 @@
 int main(void)
 {
    test();
-   //driver();
+   driver();
    return 0;
 }
 
