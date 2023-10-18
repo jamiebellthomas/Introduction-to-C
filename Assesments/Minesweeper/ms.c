@@ -1,7 +1,7 @@
 #include "ms.h"
 #define LEGAL_CHAR_COUNT 11
 #define MAX_ADJACENT 8
-#define ASCII_SHIFT
+#define LEGAL_CHARS "012345678?X"
 // Maybe some of your own function prototypes here
 
 struct cell {char adjacent[MAX_ADJACENT+1]; char value;};
@@ -15,7 +15,7 @@ char replacement_value(cell c);
 unsigned unk_counter(char s[MAX_ADJACENT+1]);
 board unk_replacement(board b, int row, int col);
 int legal_char_checker(char inp[MAXSQ*MAXSQ+1]);
-unsigned mine_counter(char inp[MAXSQ*MAXSQ+1]);
+unsigned mine_counter(char* inp);
 int correct_str_len(unsigned width, unsigned height, char inp[MAXSQ*MAXSQ+1]);
 board init_board(int totmines, int width, int height);
 
@@ -72,10 +72,10 @@ board solve_rule_2(board b){
     for(int row = 0;row<b.h;row++){
         for(int col = 0;col<b.w;col++){
             if(isdigit(b.grid[row][col])){
-                unsigned unk_plus_mine = 0;
+                unsigned unknown_plus_mine = 0;
                 cell cell_details = cell_info(b,row,col);
-                unk_plus_mine = unk_counter(cell_details.adjacent) + mine_counter(cell_details.adjacent);
-                if((int)unk_plus_mine == (b.grid[row][col]-'0')){
+                unknown_plus_mine = unk_counter(cell_details.adjacent) + mine_counter(cell_details.adjacent);
+                if((int)unknown_plus_mine == (b.grid[row][col]-'0')){
                     b = unk_replacement(b,row,col);
                 }
             }
@@ -100,9 +100,17 @@ cell cell_info(board b, int row, int col){
     cell current_cell = {.value = b.grid[row][col],
                        .adjacent = {'0'}};
     int i,j, neighbours = 0;
+    // This nested for loop looks at the 3x3 grid surrounding a cell
     for(i = -1;i <= 1;i++){
         for(j = -1;j <= 1;j++){
-            if((row+i)<b.h && (row+i)>=0 && (col+j)<b.w && (col+j)>=0 && ((i != 0) || (j != 0))){
+            // This conditional clause ensures the adjacent cells
+            // being considered within the array bounds aswell as not
+            // considering the original cell.
+            if((row+i)<b.h &&
+               (row+i)>=0  &&
+               (col+j)<b.w &&
+               (col+j)>=0  &&
+               ((i != 0) || (j != 0))){
                 current_cell.adjacent[neighbours++] = b.grid[row+i][col+j];
             }
         }
@@ -113,6 +121,7 @@ cell cell_info(board b, int row, int col){
 char replacement_value(cell c){
     unsigned mine_count;
     mine_count = mine_counter(c.adjacent);
+    //Converts numeric value to a char
     mine_count += '0';
     return mine_count;
 }
@@ -131,7 +140,8 @@ board unk_replacement(board b, int row, int col){
     int i,j;
         for(i = -1;i <= 1;i++){
             for(j = -1;j <= 1;j++){
-                if((row+i)<b.h && (row+i)>=0 && (col+j)<b.w && (col+j)>=0){
+                if((row+i)<b.h && (row+i)>=0 &&
+                   (col+j)<b.w && (col+j)>=0){
                     if(b.grid[row+i][col+j] == UNK){
                         b.grid[row+i][col+j] = MINE;
 		    }
@@ -169,7 +179,7 @@ bool syntax_check(unsigned totmines, unsigned width, unsigned height, char inp[M
 }
 
 int legal_char_checker(char inp[MAXSQ*MAXSQ+1]){
-    char legal_chars[LEGAL_CHAR_COUNT+1] = "012345678?X";
+    char legal_chars[LEGAL_CHAR_COUNT+1] = LEGAL_CHARS;
     for(int c = 0 ; c<(int)strlen(inp) ; c++){
         if(strchr(legal_chars, inp[c]) == NULL){
             return 0;
@@ -178,7 +188,7 @@ int legal_char_checker(char inp[MAXSQ*MAXSQ+1]){
     return 1;
 }
 
-unsigned mine_counter(char inp[MAXSQ*MAXSQ+1]){
+unsigned mine_counter(char* inp){
     unsigned mine_count = 0;
     for(int c = 0 ; c<(int)strlen(inp) ; c++){
         if(inp[c] == MINE){
@@ -220,17 +230,6 @@ board init_board(int totmines, int width, int height){
     return new_board;
 }
 
-void print_2D_array(int array[MAXSQ][MAXSQ], int height, int width){
-    for(int row = 0;row < height;row++){
-        for(int col = 0;col < width;col++){
-            printf("%c", array[row][col]);
-        }
-	printf("\n");
-    }
-}
-
-
-
 /* -----------
  TESTING
 ----------------*/
@@ -253,6 +252,8 @@ void test(void){
         }
     }
 
+    //Overall make_board function tests
+
     test_board = make_board(test_totmines, test_width, test_height, test_inp);
     for(row = 0;row < test_height;row++){
         for(col = 0;col < test_width;col++){
@@ -263,76 +264,88 @@ void test(void){
         }
     }
 
-    // Syntax checker tests
+    // Syntax checker sub function tests
 
-    assert(legal_char_checker(test_inp) == 1);
+    assert(legal_char_checker(test_inp));
     assert(legal_char_checker(test_inp_bad) == 0);
     assert(mine_counter(test_inp) == 1);
     assert(mine_counter(test_inp_bad) == 2);
-    assert(correct_str_len(test_width, test_height, test_inp) == 1);
+    assert(correct_str_len(test_width, test_height, test_inp));
     assert(correct_str_len(test_width, test_height, test_inp_bad) == 0);
-    assert(syntax_check(test_totmines, test_width, test_height, test_inp) == true);
+
+    // Main syntax_checker tests
+
+    assert(syntax_check(test_totmines, test_width, test_height, test_inp));
     assert(syntax_check(test_totmines, test_width, test_height, test_inp_bad) == false);
 
-    // board2str check.
+    // board2str test
 
     board2str(test_inp_bad, test_board);
     assert(strcmp(test_inp_bad,test_inp) == 0);
 
-    // Cell struct and replacement values
+    // Cell struct creation and
+    // replacement value calculation tests
 
     cell test_cell;
     test_cell = cell_info(test_board,0,0);
     assert(strcmp(test_cell.adjacent, "001") == 0);
+    assert(test_cell.value == '0');
 
     test_cell = cell_info(test_board,0,1);
-    //printf("%s",test_cell.adjacent);
     assert(strcmp(test_cell.adjacent, "00011") == 0);
+    assert(test_cell.value == '0');
 
     test_cell = cell_info(test_board,0,2);
     assert(strcmp(test_cell.adjacent, "00111") == 0);
+    assert(test_cell.value == '0');
 
     test_cell = cell_info(test_board,1,1);
     assert(strcmp(test_cell.adjacent, "0000101X") == 0);
+    assert(test_cell.value == '1');
+
     char test_replacement;
     test_replacement = replacement_value(test_cell);
     assert(test_replacement == '1');
 
-    // solve rule 1 tests
+    // Overall solve rule 1 tests
     char test_inp2[MAXSQ*MAXSQ+1] = "000000?11001X100?1?000000";
-    board test_board2 = make_board(1, 5, 5, test_inp2);
-    test_board2 = solve_rule_1(test_board2);
-    board2str(test_inp2, test_board2);
+    test_board = make_board(1, 5, 5, test_inp2);
+    test_board = solve_rule_1(test_board);
+    board2str(test_inp2, test_board);
     assert(strcmp(test_inp2,test_inp) == 0);
 
-    // solve rule 2 sub function tests
+    // Solve rule 2 sub-function tests
+    // Unknown counter test (Counts the number of unknowns in
+    // Moore Neighbourhood)
     char test_inp3[MAXSQ*MAXSQ+1] = "000000?11001X100?1?0";
-    board test_board3 = make_board(1, 5, 4, test_inp3);
-    test_cell = cell_info(test_board3,3,2);
+    test_board = make_board(1, 5, 4, test_inp3);
+    test_cell = cell_info(test_board,3,2);
     assert(unk_counter(test_cell.adjacent) == 2);
 
+    //Unknown replacement (replaces unknowns with mines
+    // where applicable)
     char test_unkr_input[MAXSQ*MAXSQ+1] = "??2X6X??2";
-    board test_unkr_board = make_board(6,3,3,test_unkr_input);
-    test_unkr_board = unk_replacement(test_unkr_board, 1, 1);
-    board2str(test_unkr_input,test_unkr_board);
+    test_board = make_board(6,3,3,test_unkr_input);
+    test_board = unk_replacement(test_board, 1, 1);
+    board2str(test_unkr_input,test_board);
     assert(strcmp(test_unkr_input,"XX2X6XXX2") == 0);
 
-    //test edge cases
+    //test edge cases of unknown replacement (corner cell)
     char test_unkr_input2[MAXSQ*MAXSQ+1] = "3X2X?2221";
-    test_unkr_board = make_board(3,3,3,test_unkr_input2);
-    test_unkr_board = unk_replacement(test_unkr_board, 0, 0);
-    board2str(test_unkr_input2,test_unkr_board);
+    test_board = make_board(3,3,3,test_unkr_input2);
+    test_board = unk_replacement(test_board, 0, 0);
+    board2str(test_unkr_input2,test_board);
     assert(strcmp(test_unkr_input2,"3X2XX2221") == 0);
 
-    // solve rule 2 function test
+    // overall solve rule 2 function and check_solve tests
     char test_inp4[MAXSQ*MAXSQ+1] = "2XX102?53112??10122100000";
     test_board = make_board(1, 5, 5, test_inp4);
     assert(check_solve(test_board) == 0);
     test_board = solve_rule_2(test_board);
     board2str(test_inp4,test_board);
     assert(strcmp(test_inp4,"2XX102X53112XX10122100000") == 0);
-    assert(check_solve(test_board) == 1);
+    assert(check_solve(test_board));
 
-    //solve_board() function is tested thoroughly in 
+    //solve_board() function is tested thoroughly in
     //dvr.c so will not be looked at here
 }
