@@ -1,4 +1,5 @@
 #include "ms.h"
+#include <stdlib.h>
 #define LEGAL_CHAR_COUNT 11
 #define MAX_ADJACENT 8
 #define LEGAL_CHARS "012345678?X"
@@ -48,7 +49,9 @@ board solve_board(board b){
     b = solve_rule_1(b);
     return b;
 }
-
+/* This function implements Rule 1 where if 
+   all mines have been discovered, the remaining
+   unknowns can be filled in as numbers */
 board solve_rule_1(board b){
     unsigned mine_count;
     char flat_grid[MAXSQ*MAXSQ+1];
@@ -67,7 +70,9 @@ board solve_rule_1(board b){
     return b;
 }
 
-
+/* This function implements Rule 2 where if the sum of 
+   unknowns and mines around a numeric cell is equal to
+   the cell's value, the unknowns can be marked as mines */
 board solve_rule_2(board b){
     for(int row = 0;row<b.h;row++){
         for(int col = 0;col<b.w;col++){
@@ -75,8 +80,8 @@ board solve_rule_2(board b){
                 unsigned unknown_plus_mine = 0;
                 cell cell_details = cell_info(b,row,col);
                 unknown_plus_mine = unk_counter(cell_details.adjacent) + mine_counter(cell_details.adjacent);
-                if((int)unknown_plus_mine == (b.grid[row][col]-'0')){
-                    b = unk_replacement(b,row,col);
+                if((int)unknown_plus_mine == (cell_details.value-'0')){
+                    b = unk_replacement(b,row,col); 
                 }
             }
         }
@@ -118,6 +123,9 @@ cell cell_info(board b, int row, int col){
     return current_cell;
 }
 
+/* This counts the number of mines in a cell's Moore's
+   Neighbourhood and returns the correct value for that
+   cell as an int */
 char replacement_value(cell c){
     unsigned mine_count;
     mine_count = mine_counter(c.adjacent);
@@ -126,6 +134,8 @@ char replacement_value(cell c){
     return mine_count;
 }
 
+/* unk_counter counts the number of unknown cells
+   in a Moore's Neighbourhood*/
 unsigned unk_counter(char s[MAX_ADJACENT+1]){
     unsigned counter = 0;
     for(int i = 0;i<MAX_ADJACENT;i++){
@@ -135,7 +145,9 @@ unsigned unk_counter(char s[MAX_ADJACENT+1]){
     }
     return counter;
 }
-
+/* unk_replacement takes in a cell's index coodinates 
+   and replaces all unknowns in the Moore's Neigbourhood
+   with mines. */
 board unk_replacement(board b, int row, int col){
     int i,j;
         for(i = -1;i <= 1;i++){
