@@ -23,7 +23,12 @@ board init_board(int totmines, int width, int height);
 ----------------*/
 
 /* The main board solve function passes board pointers to solve_rule_1
-   and solve_rule_2 to prevent large numbers of copies from being made */
+   and solve_rule_2 to prevent large numbers of copies from being made
+   
+   solve_rule_1 is called initially as this would be the optimal way of solving
+   if it's applicable. If it doesn't solve it, solve_rule_2 is called until the delta
+   between iterations becomes zero. At this point we check if it's solved. If not we 
+   reapply rule 1 to see if this can solve it and return whatever the result is. */
 board solve_board(board b){
     solve_rule_1(&b);
     if(check_solve(b)){
@@ -109,8 +114,8 @@ cell cell_info(board b, int row, int col){
     for(i = -1;i <= 1;i++){
         for(j = -1;j <= 1;j++){
             // This conditional clause ensures the adjacent cells
-            // being considered within the array bounds aswell as not
-            // considering the original cell.
+            // being considered are both within the array bounds and
+            // not the original cell itself.
             if((row+i)<b.h &&
                (row+i)>=0  &&
                (col+j)<b.w &&
@@ -125,7 +130,7 @@ cell cell_info(board b, int row, int col){
 
 /* This counts the number of mines in a cell's Moore's
    Neighbourhood and returns the correct value for that
-   cell as an int */
+   cell as a char so it can be easily inserted into a grid */
 char replacement_value(cell c){
     unsigned mine_count;
     mine_count = char_counter(c.adjacent,MINE);
@@ -135,9 +140,9 @@ char replacement_value(cell c){
 }
 
 
-/* unk_replacement takes in a cell's index coodinates 
+/* unk_replacement takes in a board and a cell's index coodinates 
    and replaces all unknowns in the Moore's Neigbourhood
-   with mines. */
+   of that cell with mines. */
 board unk_replacement(board b, int row, int col){
     int i,j;
         for(i = -1;i <= 1;i++){
@@ -259,7 +264,7 @@ void test(void){
     }
 
     
-    // The final make board test, look at the over all make_board function works
+    // The final make board test looks at the over all make_board function
     // The only additional piece of functionality here is inserting the input string
     // as a 2D array into the struct. To test this a nested for loop can be used and to
     // compare the board.grid to the input string on a char by char basis.
@@ -272,7 +277,7 @@ void test(void){
 
     // Syntax checker sub function tests ensure that the legal char checker,
     // the char counter (for the currect number of mines) and the correct 
-    // input string length are being examined using both good and bad inputs
+    // input string length are being validated using both good and bad inputs
 
     assert(legal_char_checker(test_inp));
     assert(legal_char_checker(test_inp_bad) == 0);
@@ -300,7 +305,7 @@ void test(void){
     // multiple edge cases
 
     // Let's start with a basic case (a central cell). This should return 
-    // the 8 adjacent cells
+    // the 8 cells in its Moore's Neighbourhood
     cell test_cell;
     test_cell = cell_info(test_board,1,1);
     assert(strcmp(test_cell.adjacent, "0000101X") == 0);
@@ -330,7 +335,8 @@ void test(void){
     board large_board = make_board(0, 10, 10, large_inp);
     test_cell = cell_info(large_board,0,0);
     assert(strcmp(test_cell.adjacent, "100") == 0);
-    // No sanitisation errors detected...
+    // No sanitisation errors detected which means areas outside the designated array 
+    // size aren't being considered
 
    // One other edge case was for a cell on the edge of the board. This should return
    // A string of length 5. If all 4 corners are working it is safe to assume at this point
@@ -343,7 +349,7 @@ void test(void){
 
     // The replacement value takes a cell, looks at the adjacent squares and returns
     // The value that should be in that cell. This is used as a sub-function in Rule 1
-    // Therefore the number should equal the number of adjacent lines
+    // Therefore the number should equal the number of adjacent mines
     // Even though this would only be appled to unknown cells, the best way to test it
     // is by applying it to a known cell and ensuring it arrives at the same value as
     // the one present
@@ -356,6 +362,7 @@ void test(void){
     // Rule 1 calles board2str, char_counter, cell_info and replacement_value.
     // All of these functions have been tested individually so all that is left is to
     // Test the over all function to ensure it can solve suitably simple boards.
+    // This board will be an unsolved verison of test_inp.
     char test_inp2[MAXSQ*MAXSQ+1] = "000000?11001X100?1?000000";
     test_board = make_board(1, 5, 5, test_inp2);
     solve_rule_1(&test_board);
@@ -375,7 +382,7 @@ void test(void){
 
     // The second additional function is replacing adjacent
     // unknowns with mines. For this a simple example with multiple
-    // mines, unknowns and ints will be chosen. The output should convert
+    // mines, unknowns and numeric chars will be chosen. The output should convert
     // unknowns to mines and leave the remaning chars untouched.
     char test_unkr_input[MAXSQ*MAXSQ+1] = "??2X6X??2";
     test_board = make_board(6,3,3,test_unkr_input);
@@ -397,7 +404,7 @@ void test(void){
     // All these functions have been appropriately tested so all that is
     // left is to apply the solve_rule_2 function to a suitably challenging
     // grid to ensure it is working as anticipated.
-    // This will also be a good place to tes tthe check_solve function which
+    // This will also be a good place to test the check_solve function which
     // Is the only other function that will be called in solve_board.
     char test_inp4[MAXSQ*MAXSQ+1] = "2XX102?53112??10122100000";
     test_board = make_board(1, 5, 5, test_inp4);
@@ -407,19 +414,21 @@ void test(void){
     assert(strcmp(test_inp4,"2XX102X53112XX10122100000") == 0);
     assert(check_solve(test_board));
 
-    //solve_board will now be tested on the same examples that its sub-functions 
+    // solve_board will now be tested on the same examples that its sub-functions 
     // (solve_rule_1 and solve_rule_2) were tested on to ensure these rules are being
-    // called appropriately 
+    // called appropriately.
 
-    test_board = make_board(1, 5, 5, test_inp2);
+    char test_inp5[MAXSQ*MAXSQ+1] = "000000?11001X100?1?000000";
+    test_board = make_board(1, 5, 5, test_inp5);
     test_board = solve_board(test_board);
-    board2str(test_inp2, test_board);
-    assert(strcmp(test_inp2,test_inp) == 0);
+    board2str(test_inp5, test_board);
+    assert(strcmp(test_inp5,test_inp) == 0);
 
-    test_board = make_board(1, 5, 5, test_inp4);
+    char test_inp6[MAXSQ*MAXSQ+1] = "2XX102?53112??10122100000";
+    test_board = make_board(1, 5, 5, test_inp6);
     test_board = solve_board(test_board);
-    board2str(test_inp4,test_board);
-    assert(strcmp(test_inp4,"2XX102X53112XX10122100000") == 0);
+    board2str(test_inp6,test_board);
+    assert(strcmp(test_inp6,"2XX102X53112XX10122100000") == 0);
     // We need to add tests to ensure the solve function (and by extension, rule 1 and rule 2 functions) 
     // only act where applicable.
 
@@ -443,7 +452,7 @@ void test(void){
 
     // The final example board will be a board that can only be partially solved using these rules
     // (rule 2 is applicable on certain areas and rule 1 is never applicable)
-    // solve_board SHOULD return the partially solved board.
+    // solve_board should return the partially solved board.
     char partial_inp[MAXSQ*MAXSQ+1] = "001X?0013?11011X2100???00";
     board partial_board = make_board(5,5,5,partial_inp);
     partial_board = solve_board(partial_board);
