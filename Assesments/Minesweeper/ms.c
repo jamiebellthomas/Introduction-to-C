@@ -99,7 +99,6 @@ bool check_solve(board b){
     return true;
 }
 
-// TODO: Test array bounds for 10x10 grid
 cell cell_info(board b, int row, int col){
     cell current_cell = {.value = b.grid[row][col],
                        .adjacent = {'0'}};
@@ -295,26 +294,50 @@ void test(void){
     // Cell struct creation and
     // replacement value calculation tests
 
-    // The cell struct is used in both rule 1 and rule 2 and has multiple edge cases
+    // The cell struct is used in both rule 1 and rule 2 and has 
+    // multiple edge cases
 
-    // The first edge case is identifying the legal adjacent cells to a corner cell
-    // This should return a string of length three
+    // Let's start with a basic case (a central cell). This should return 
+    // the 8 adjacent cells
     cell test_cell;
+    test_cell = cell_info(test_board,1,1);
+    assert(strcmp(test_cell.adjacent, "0000101X") == 0);
+    assert(test_cell.value == '1');
+
+    // Now each of the 4 corners need to be examined to ensure all parts of the
+    // Overflow catching clause are working:
     test_cell = cell_info(test_board,0,0);
     assert(strcmp(test_cell.adjacent, "001") == 0);
     assert(test_cell.value == '0');
 
-   // The other edge case was for a cell on the edge of the board. This should return
-   // A string of length 5
+    test_cell = cell_info(test_board,0,4);
+    assert(strcmp(test_cell.adjacent, "010") == 0);
+    assert(test_cell.value == '0');
 
+    test_cell = cell_info(test_board,4,0);
+    assert(strcmp(test_cell.adjacent, "010") == 0);
+    assert(test_cell.value == '0');
+
+    test_cell = cell_info(test_board,4,4);
+    assert(strcmp(test_cell.adjacent, "100") == 0);
+    assert(test_cell.value == '0');
+
+    // One final thing to look at for this funtion is to run an adjacency calculation on
+    // A max sized grid (10x10) and check for any overflow sanitisation warnings.
+    char large_inp[MAXSQ*MAXSQ+1] = "0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    board large_board = make_board(0, 10, 10, large_inp);
+    test_cell = cell_info(large_board,0,0);
+    assert(strcmp(test_cell.adjacent, "100") == 0);
+    // No sanitisation errors detected...
+
+   // One other edge case was for a cell on the edge of the board. This should return
+   // A string of length 5. If all 4 corners are working it is safe to assume at this point
+   // that all edges should be working, so not all edges will be tested
     test_cell = cell_info(test_board,0,2);
     assert(strcmp(test_cell.adjacent, "00111") == 0);
     assert(test_cell.value == '0');
 
-    // Central cells should return a string of length 8
-    test_cell = cell_info(test_board,1,1);
-    assert(strcmp(test_cell.adjacent, "0000101X") == 0);
-    assert(test_cell.value == '1');
+    
 
     // The replacement value takes a cell, looks at the adjacent squares and returns
     // The value that should be in that cell. This is used as a sub-function in Rule 1
@@ -323,6 +346,7 @@ void test(void){
     // is by applying it to a known cell and ensuring it arrives at the same value as
     // the one present
     char test_replacement;
+    test_cell = cell_info(test_board,1,1);
     test_replacement = replacement_value(test_cell);
     assert(test_replacement == '1');
 
