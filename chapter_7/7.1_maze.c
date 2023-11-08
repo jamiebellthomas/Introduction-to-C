@@ -19,6 +19,8 @@ For now let's just start with reading in the data
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
+#define WALL 'X'
+#define CORNER_SHIFT 2
 
 typedef int coordinates[2];
 
@@ -33,6 +35,7 @@ void maze_init(maze* maze , char* file_name);
 char** grid_memory_allocation(char** start, int rows, int cols, FILE* file);
 void print_2D_array(char** array, int rows, int cols);
 void maze_free(char** maze, int rows);
+void exit_counter_and_entry_point(maze* maze);
 
 int main(int argc, char* argv[]){
     if(argc != 2){
@@ -43,6 +46,11 @@ int main(int argc, char* argv[]){
                  .grid = NULL,
                  .current_state = {0}};
     maze_init(&maze, argv[1]);
+
+    exit_counter_and_entry_point(&maze);
+    assert(maze.current_state[0] == 1);
+    assert(maze.current_state[1] == 0);
+
     maze_free(maze.grid,maze.size[0]);
 
 }
@@ -109,3 +117,57 @@ void maze_free(char** maze, int rows){
 
 // Now we've sorted out the reading in of the data, we need to design
 // The recursion that's going to take us through this maze
+// The first thing to do is to design something that'll tell us starting index coordinates
+
+
+
+void exit_counter_and_entry_point(maze* maze){
+    int counter = 0, closest = maze->size[0] + maze->size[1];
+    char near, far;
+    for(int i = 1; i<=(maze->size[1]-CORNER_SHIFT);i++){
+        near = maze->grid[0][i];
+        far = maze->grid[(maze->size[0]-1)][i];
+        if(near != WALL){
+            counter++;
+            if(i<closest){
+                closest = i;
+                maze->current_state[0] = 0;
+                maze->current_state[1] = i;
+            }
+        }
+        if(far != WALL){
+            counter++;
+            if(i+(maze->size[0]-1)<closest){
+                closest = i+(maze->size[0]-1);
+                maze->current_state[0] = maze->size[0]-1;
+                maze->current_state[1] = i;
+            }
+        }
+    }
+
+    for(int i = 1; i<=(maze->size[0] - CORNER_SHIFT); i++){
+        near = maze->grid[i][0];
+        far = maze->grid[i][(maze->size[1]-1)];
+        if(near != WALL){
+            counter++;
+            if(i<closest){
+                closest = i;
+                maze->current_state[0] = i;
+                maze->current_state[1] = 0;
+            }
+        }
+        if(far != WALL){
+            counter++;
+            if(i+(maze->size[1]-1)<closest){
+                closest = i+(maze->size[1]-1);
+                maze->current_state[0] = i;
+                maze->current_state[1] = maze->size[1]-1;
+            }
+        }
+    }
+    if(counter != 2){
+        fprintf(stderr,"There are %i entrances to the maze, there should only be 2!\n",counter);
+        exit(0);
+    }    
+}
+
