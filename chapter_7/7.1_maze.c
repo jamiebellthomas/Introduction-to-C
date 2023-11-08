@@ -20,6 +20,8 @@ For now let's just start with reading in the data
 #include <stdbool.h>
 #include <assert.h>
 #define WALL 'X'
+#define UNEXPLORED 'O'
+#define EXPLORED 'I'
 #define CORNER_SHIFT 2
 
 typedef int coordinates[2];
@@ -27,7 +29,7 @@ typedef int coordinates[2];
 struct maze {
     coordinates size;
     char** grid;
-    coordinates current_state;
+    coordinates start_state;
 };
 typedef struct maze maze;
 
@@ -36,6 +38,10 @@ char** grid_memory_allocation(char** start, int rows, int cols, FILE* file);
 void print_2D_array(char** array, int rows, int cols);
 void maze_free(char** maze, int rows);
 void exit_counter_and_entry_point(maze* maze);
+int maze_search(maze* maze, int current_row, int current_col);
+bool check_solve(maze* maze, int current_row, int current_col);
+bool is_safe(maze* maze, int current_row, int current_col);
+void remove_o(maze* maze);
 
 int main(int argc, char* argv[]){
     if(argc != 2){
@@ -44,12 +50,27 @@ int main(int argc, char* argv[]){
     }
     maze maze = {.size = {0},
                  .grid = NULL,
-                 .current_state = {0}};
+                 .start_state = {0}};
     maze_init(&maze, argv[1]);
-
+    print_2D_array(maze.grid, maze.size[0],maze.size[1]);
     exit_counter_and_entry_point(&maze);
-    assert(maze.current_state[0] == 1);
-    assert(maze.current_state[1] == 0);
+    assert(maze.start_state[0] == 1);
+    assert(maze.start_state[1] == 0);
+
+    int outcome = maze_search(&maze,maze.start_state[0],maze.start_state[1]);
+    if(outcome == 1){
+        printf("-------------------\n");
+        printf("Succesfully Solved:\n");
+        printf("-------------------\n");
+        remove_o(&maze);
+        print_2D_array(maze.grid, maze.size[0],maze.size[1]);
+    }
+    
+    else{
+        printf("-------------------\n");
+        printf("No feasible route through maze\n");
+        printf("-------------------\n");
+    }
 
     maze_free(maze.grid,maze.size[0]);
 
@@ -77,7 +98,7 @@ void maze_init(maze* maze , char* file_name){
                                         maze->size[1], 
                                         file);
     fclose(file);
-    print_2D_array(maze->grid, maze->size[0],maze->size[1]);
+    
 
     
 
@@ -131,16 +152,16 @@ void exit_counter_and_entry_point(maze* maze){
             counter++;
             if(i<closest){
                 closest = i;
-                maze->current_state[0] = 0;
-                maze->current_state[1] = i;
+                maze->start_state[0] = 0;
+                maze->start_state[1] = i;
             }
         }
         if(far != WALL){
             counter++;
             if(i+(maze->size[0]-1)<closest){
                 closest = i+(maze->size[0]-1);
-                maze->current_state[0] = maze->size[0]-1;
-                maze->current_state[1] = i;
+                maze->start_state[0] = maze->size[0]-1;
+                maze->start_state[1] = i;
             }
         }
     }
@@ -152,16 +173,16 @@ void exit_counter_and_entry_point(maze* maze){
             counter++;
             if(i<closest){
                 closest = i;
-                maze->current_state[0] = i;
-                maze->current_state[1] = 0;
+                maze->start_state[0] = i;
+                maze->start_state[1] = 0;
             }
         }
         if(far != WALL){
             counter++;
             if(i+(maze->size[1]-1)<closest){
                 closest = i+(maze->size[1]-1);
-                maze->current_state[0] = i;
-                maze->current_state[1] = maze->size[1]-1;
+                maze->start_state[0] = i;
+                maze->start_state[1] = maze->size[1]-1;
             }
         }
     }
@@ -171,3 +192,55 @@ void exit_counter_and_entry_point(maze* maze){
     }    
 }
 
+int maze_search(maze* maze, int current_row, int current_col){
+    //printf("Current State: %i, %i\n",current_row,current_col);
+    if(current_col < 0 || current_row < 0){
+        return 0;
+    }
+    
+    if(is_safe(maze, current_row, current_col)){
+        maze->grid[current_row][current_col] = EXPLORED;
+
+        if(check_solve(maze, current_row, current_col)){
+            return 1;
+        }
+
+        if(maze_search(maze,current_row+1,current_col) ||
+           maze_search(maze,current_row,current_col+1) ||
+           maze_search(maze,current_row-1,current_col) ||
+           maze_search(maze,current_row,current_col-1)){
+            return 1;
+           }
+        
+        maze->grid[current_row][current_col] = WALL;
+    }
+
+    return 0;
+
+}
+
+bool check_solve(maze* maze, int current_row, int current_col){
+    if((current_row == 0 || current_row == (maze->size[0]-1) ||
+       current_col == 0 || current_col == (maze->size[1]-1)) &&
+       (current_row != maze->start_state[0] ||  current_col != maze->start_state[1])){
+        return true;
+    }
+    return false;
+}
+
+bool is_safe(maze* maze, int current_row, int current_col){
+    if(maze->grid[current_row][current_col] != UNEXPLORED){
+        return false;
+    }
+    return true;
+}
+
+void remove_o(maze* maze){
+    for(int i = 0;i<maze->size[0];i++){
+        for(int j = 0;j<maze->size[1];j++){
+            if(maze->grid[i][j] == UNEXPLORED){
+                maze->grid[i][j] = WALL;
+            }
+        }
+    }
+}
