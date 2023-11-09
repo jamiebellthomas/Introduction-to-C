@@ -6,6 +6,10 @@ int main(int argc, char* argv[]){
     int N = 0;
     user_input(argc, argv, &N, &verbose);
     char board[MAX_GRID][MAX_GRID];
+    init_board(board,N);
+    state solution_space[MAX_SEARCH_SPACE];
+    
+    
 
 
 }
@@ -66,7 +70,7 @@ bool valid_number(char val[]){
 INITIALISE BOARD
 ----------------
 */
-void init_board(char* board, int size){
+void init_board(char board[MAX_GRID][MAX_GRID], int size){
     for(int row = 0;row<size;row++){
         for(int col = 0;col<size;col++){
             board[row][col] = QUEEN_UNCOVERED;
@@ -74,11 +78,12 @@ void init_board(char* board, int size){
     }
 }
 
-void print_board(char* board, int size){
+void print_board(char board[MAX_GRID][MAX_GRID], int size){
     for(int row = 0;row<size;row++){
         for(int col = 0;col<size;col++){
-            printf("%s",board[row][col]);
+            printf("%c",board[row][col]);
         }
+        printf("\n");
     }
 }
 
@@ -111,6 +116,12 @@ void test(){
     assert(test_N == 8);
     assert(test_verbose);
 
-    
-
+    // Testing board initialisation (To a grid of uncovered squares)
+    char test_board[MAX_GRID][MAX_GRID];
+    init_board(test_board,test_N);
+    for(int row = 0 ; row < test_N ; row++){
+        for(int col = 0 ; col < test_N ; col++){
+            assert(test_board[row][col] == QUEEN_UNCOVERED);
+        }
+    }
 }
