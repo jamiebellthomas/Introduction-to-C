@@ -8,9 +8,6 @@ int main(int argc, char* argv[]){
     char board[MAX_GRID][MAX_GRID];
     init_board(board,N);
     state solution_space[MAX_SEARCH_SPACE];
-    
-    
-
 
 }
 /*
@@ -45,8 +42,6 @@ void user_input(int argc, char* argv[], int* N, bool* verbose){
     *N = atoi(argv[2]);
     *verbose = true;
     return;
-            
-        
     }
 
 }
@@ -65,6 +60,133 @@ bool valid_number(char val[]){
     return false;
 }
 
+/*
+--------------------
+Unique Board Checker
+--------------------
+*/
+/*
+//BOTH OF THESE ARE UNTESTED!!!
+bool unique_checker(state solution_space[MAX_SEARCH_SPACE], char board[MAX_GRID][MAX_GRID], int frontier){
+    for(int i = 0;i<frontier;i++){
+        if(grid_comparison(solution_space[i].grid,board){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool grid_comparison(char board1[MAX_GRID][MAX_GRID], char board2[MAX_GRID][MAX_GRID], int size){
+    for(int i = 0;i<size;i++){
+        if(strcmp(board1[i],board2[i]){
+            return false;
+        }
+    }
+    return true;
+}
+*/
+/*
+-----------
+QUEEN ADDER
+-----------
+*/
+
+void queen_adder(char* board[],int row_index, int col_index, int size){
+    // Add a queen in coords given and, change all unexplored cells in range to explored, don't effect queen cells
+    board[row_index][col_index] = QUEEN;
+    row_explore(board, row_index, size);
+    col_explore(board, col_index, size);
+    diag_explore(board, row_index, col_index, size);
+
+}
+
+void row_explore(char* board[], int row_index, int size){
+    for(int col = 0;col<size; col++){
+        if(board[row_index][col] == QUEEN_UNCOVERED){
+            board[row_index][col] = QUEEN_COVERED;
+        }
+    }
+}
+void col_explore(char* board[], int col_index, int size){
+    for(int row = 0; row<size; row++){
+        if(board[col_index][row] == QUEEN_UNCOVERED){
+            board[col_index][row] = QUEEN_COVERED;
+        }
+    }
+}
+void diag_explore(char* board[], int row_index, int col_index, int size){
+    int size_index = size-1;
+    for(int step = 1;step<size;step++){
+        if((row_index+step) < size_index &&
+           (col_index+step) < size_index &&
+           board[row_index+step][col_index+step] == QUEEN_UNCOVERED){
+            board[row_index+step][col_index+step] = QUEEN_COVERED;
+        }
+        if((row_index-step) > 0 &&
+           (col_index-step) > 0 &&
+           board[row_index-step][col_index-step] == QUEEN_UNCOVERED){
+            board[row_index-step][col_index-step] = QUEEN_COVERED;
+        }
+        if((row_index+step) < size_index &&
+           (col_index-step) > 0 &&
+           board[row_index+step][col_index-step] == QUEEN_UNCOVERED){
+            board[row_index+step][col_index-step] = QUEEN_COVERED;
+        }
+        if((row_index-step) > 0 &&
+           (col_index+step) < size_index &&
+           board[row_index-step][col_index+step] == QUEEN_UNCOVERED){
+            board[row_index-step][col_index+step] = QUEEN_COVERED;
+        }
+    }
+}
+
+/*
+---------------
+Next Generation
+---------------
+pseudo:
+inputs: solution space pointer, current index, current frontier, board size
+process, looks at state at that index, generates new child states, asseses uniquness and adds to soution space if appropriate
+returns: int, number of states added
+
+for each cell
+    if unexplored
+        copy board over, add queen to square, recalculate it
+        if unique
+            add to solution_space
+Functions:
+
+- Adding queen to board effect
+- Unique board in solution space (DONE)
+- 2D board copy
+- Add board to solution space
+*/
+/*
+int next_gen(state* solution_space, int current_index, long current_frontier, int size){
+    char temp_board[MAX_GRID][MAX_GRID];
+// Going to be type errors using this in funtions w/ pointers ^^
+    int additions = 0;
+    for(int row = 0;row<size;row++{
+        for(int col = 0;col<size;col++){
+            if(solution_space[curren_index]->grid[row][col] == QUEEN_UNEXPLORED){
+                board_copy(solution_space[current_index]->grid[row][col],temp_board);
+                // ADD QUEEN FUNCTION on temp_board
+                if(unique_checker(solution_space, temp_board, current_frontier)){
+                    add_board(....);
+                    additions++;
+                }
+            }
+        }
+    }
+    return additions;
+}
+
+void board_copy(char* board_old, char* board_new, int size){
+    for(int row = 0;row<size;row++){
+        strcpy(board_new[row],board_old[row]);
+    }
+}
+*/
 /*
 ----------------
 INITIALISE BOARD
@@ -124,4 +246,8 @@ void test(){
             assert(test_board[row][col] == QUEEN_UNCOVERED);
         }
     }
+
+    // Test Queen Addition Functions
+    char* test_board2[] = {{'O','O','O','O'},{'O','O','O','O'},{'O','O','O','O'},{'O','O','O','O'}};
+    print_board(test_board2,4);
 }
