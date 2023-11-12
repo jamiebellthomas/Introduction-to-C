@@ -21,10 +21,3 @@ typedef struct state state;
 void user_input(int argc, char* argv[], int* N, bool* verbose);
 bool valid_number(char val[]);
 void test();
-void init_board(char** board, int size);
-void print_board(char** board, int size);
-void queen_adder(char** board,int row_index, int col_index, int size);
-void row_explore(char** board,int row_index, int size);
-void col_explore(char** board,int col_index, int size);
-void diag_explore(char** board,int row_index, int col_index, int size);
-

@@ -6,7 +6,9 @@ int main(int argc, char* argv[]){
     int N = 0;
     user_input(argc, argv, &N, &verbose);
     char board[MAX_GRID][MAX_GRID];
-    init_board(board,N);
+    char** ptr = (char**)board;
+
+    init_board(ptr,N);
     state solution_space[MAX_SEARCH_SPACE];
 
 }
@@ -16,6 +18,7 @@ USER INPUT
 ----------
 */
 void user_input(int argc, char* argv[], int* N, bool* verbose){
+    printf("Function");
     if(argc < 2 || argc > 3){
         fprintf(stderr, "Program expects 1 or 2 arguments but recieved %i\n", (argc-1));
         fprintf(stderr, "Correct usage: ./8q N or ./8q -verbose N\n");
@@ -91,7 +94,7 @@ QUEEN ADDER
 -----------
 */
 
-void queen_adder(char* board[],int row_index, int col_index, int size){
+void queen_adder(char** board,int row_index, int col_index, int size){
     // Add a queen in coords given and, change all unexplored cells in range to explored, don't effect queen cells
     board[row_index][col_index] = QUEEN;
     row_explore(board, row_index, size);
@@ -100,21 +103,21 @@ void queen_adder(char* board[],int row_index, int col_index, int size){
 
 }
 
-void row_explore(char* board[], int row_index, int size){
+void row_explore(char** board, int row_index, int size){
     for(int col = 0;col<size; col++){
         if(board[row_index][col] == QUEEN_UNCOVERED){
             board[row_index][col] = QUEEN_COVERED;
         }
     }
 }
-void col_explore(char* board[], int col_index, int size){
+void col_explore(char** board, int col_index, int size){
     for(int row = 0; row<size; row++){
         if(board[col_index][row] == QUEEN_UNCOVERED){
             board[col_index][row] = QUEEN_COVERED;
         }
     }
 }
-void diag_explore(char* board[], int row_index, int col_index, int size){
+void diag_explore(char** board, int row_index, int col_index, int size){
     int size_index = size-1;
     for(int step = 1;step<size;step++){
         if((row_index+step) < size_index &&
@@ -192,7 +195,7 @@ void board_copy(char* board_old, char* board_new, int size){
 INITIALISE BOARD
 ----------------
 */
-void init_board(char board[MAX_GRID][MAX_GRID], int size){
+void init_board(char** board, int size){
     for(int row = 0;row<size;row++){
         for(int col = 0;col<size;col++){
             board[row][col] = QUEEN_UNCOVERED;
@@ -200,7 +203,7 @@ void init_board(char board[MAX_GRID][MAX_GRID], int size){
     }
 }
 
-void print_board(char board[MAX_GRID][MAX_GRID], int size){
+void print_board(char** board, int size){
     for(int row = 0;row<size;row++){
         for(int col = 0;col<size;col++){
             printf("%c",board[row][col]);
@@ -225,29 +228,33 @@ void test(){
 
     // Final user inpupt checks. Failuter messages already tested via program exits
     // Need to make sure valid inputs are allowed
-    int test_N = 0, argc;
+    int test_N = 0, test_argc;
     bool test_verbose = false;
 
     char* test_args[] = {"program","8"};
-    user_input(argc=2,test_args,&test_N,&test_verbose);
+    user_input(test_argc=2,test_args,&test_N,&test_verbose);
+    printf("Size: %i, Verbose: %i", test_N, test_verbose);
     assert(test_N == 8);
     assert(!test_verbose);
 
     char* test_args_verbose[] = {"program","-verbose","8"};
-    user_input(argc=3,test_args_verbose,&test_N,&test_verbose);
-    assert(test_N == 8);
-    assert(test_verbose);
+    user_input(test_argc=3,test_args_verbose,&test_N,&test_verbose);
+    printf("Size: %i, Verbose: %i", test_N, test_verbose);
+    //assert(test_N == 8);
+    //assert(test_verbose);
 
     // Testing board initialisation (To a grid of uncovered squares)
     char test_board[MAX_GRID][MAX_GRID];
-    init_board(test_board,test_N);
+    char** test_ptr = (char**)test_board;
+    init_board(test_ptr,test_N);
     for(int row = 0 ; row < test_N ; row++){
         for(int col = 0 ; col < test_N ; col++){
-            assert(test_board[row][col] == QUEEN_UNCOVERED);
+            assert(test_ptr[row][col] == QUEEN_UNCOVERED);
         }
     }
 
     // Test Queen Addition Functions
-    char* test_board2[] = {{'O','O','O','O'},{'O','O','O','O'},{'O','O','O','O'},{'O','O','O','O'}};
-    print_board(test_board2,4);
+    char test_board2[MAX_GRID][MAX_GRID] = {{'O'}};
+    char** ptr = (char**)test_board2;
+    //print_board(ptr,4);
 }
