@@ -1,6 +1,18 @@
 #include "8q_2.h"
 int main(int argc, char* argv[]){
     test();
+    bool verbose = false;
+    int size = 0;
+    user_input(argc, argv, &size, &verbose);
+
+    state solution_space[MAX_SEARCH_SPACE];
+    long frontier = 0, index = 0;
+
+    state first_state = init_state(size);
+    solution_space[0] = first_state;
+
+
+
 }
 /*
 ----------
@@ -53,16 +65,39 @@ bool valid_number(char val[]){
 }
 
 /*
-----------------
-INITIALISE BOARD
-----------------
+------------------------------
+INITIALISE/COPY/COMPARE STATES
+------------------------------
 */
-void init_board(state* position, int size){
+state init_state(int size){
+    state new_state = {.queens = 0,
+                        .board = {{'\0'}}};
     for(int row = 0;row<size;row++){
         for(int col = 0;col<size;col++){
-            position->board[row][col] = QUEEN_UNCOVERED;
+            new_state.board[row][col] = QUEEN_UNCOVERED;
         }
     }
+    return new_state;
+}
+
+void cpy_state(state old_state, state* new_state, int size){
+    new_state->queens = old_state.queens;
+    for(int row = 0;row<size;row++){
+        for(int col = 0;col<size;col++){
+            new_state->board[row][col] = old_state.board[row][col];
+        }
+    }
+}
+
+bool state_cmp(state* state_one, state* state_two, int size){
+    for(int row = 0;row<size;row++){
+        for(int col = 0;col<size;col++){
+            if(state_one->board[row][col] == state_two->board[row][col]){
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 void print_board(state* position, int size){
@@ -74,6 +109,15 @@ void print_board(state* position, int size){
     }
 }
 
+/*
+---------------
+NEXT GENERATION
+---------------
+*/
+
+void next_gen(){
+    
+}
 
 
 /*
@@ -95,26 +139,31 @@ void test(){
 
     char* test_args[] = {"program","8"};
     user_input(test_argc=2,test_args,&test_N,&test_verbose);
-    //printf("Size: %i, Verbose: %i\n", test_N, test_verbose);
     assert(test_N == 8);
     assert(!test_verbose);
 
     char* test_args_verbose[] = {"program","-verbose","8"};
     user_input(test_argc=3,test_args_verbose,&test_N,&test_verbose);
-    //printf("Size: %i, Verbose: %i\n", test_N, test_verbose);
     assert(test_N == 8);
     assert(test_verbose == true);
 
-    state test_state = {.queens = 0,
-                        .board = {{'\0'}}};
-    init_board(&test_state,test_N);
+    state test_state = init_state(test_N);
     for(int row = 0 ; row < test_N ; row++){
         for(int col = 0 ; col < test_N ; col++){
             assert(test_state.board[row][col] == QUEEN_UNCOVERED);
         }
     }
-    //print_board(&test_state,10);
+    test_state.board[0][0] = 'T';
+    test_state.board[1][1] = 'E';
+    test_state.board[2][2] = 'S';
+    test_state.board[3][3] = 'T';
     //print_board(&test_state,test_N);
+    state test_state_cpy;
+    cpy_state(test_state,&test_state_cpy,test_N);
+    for(int i = 0;i<=3;i++){
+        assert(test_state.board[i][i] == test_state_cpy.board[i][i]);
+    }
+    
 
     
     
