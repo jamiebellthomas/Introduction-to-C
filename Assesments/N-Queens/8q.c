@@ -195,7 +195,7 @@ void board_copy(char* board_old, char* board_new, int size){
 INITIALISE BOARD
 ----------------
 */
-void init_board(char** board, int size){
+void init_board(char board[MAX_GRID][MAX_GRID], int size){
     for(int row = 0;row<size;row++){
         for(int col = 0;col<size;col++){
             board[row][col] = QUEEN_UNCOVERED;
@@ -240,7 +240,7 @@ void test(){
     char* test_args_verbose[] = {"program","-verbose","8"};
     user_input(test_argc=3,test_args_verbose,&test_N,&test_verbose);
     printf("Size: %i, Verbose: %i", test_N, test_verbose);
-    //assert(test_N == 8);
+    assert(test_N == 8);
     //assert(test_verbose);
 
     // Testing board initialisation (To a grid of uncovered squares)
@@ -256,5 +256,5 @@ void test(){
     // Test Queen Addition Functions
     char test_board2[MAX_GRID][MAX_GRID] = {{'O'}};
     char** ptr = (char**)test_board2;
-    //print_board(ptr,4);
+    print_board(ptr,4);
 }

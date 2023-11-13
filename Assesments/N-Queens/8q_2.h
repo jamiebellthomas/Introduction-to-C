@@ -21,3 +21,5 @@ typedef struct state state;
 void user_input(int argc, char* argv[], int* N, bool* verbose);
 bool valid_number(char val[]);
 void test();
+void init_board(state* position, int size);
+void print_board(state* position, int size);

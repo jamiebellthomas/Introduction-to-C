@@ -8,7 +8,6 @@ USER INPUT
 ----------
 */
 void user_input(int argc, char* argv[], int* N, bool* verbose){
-    printf("Function");
     if(argc < 2 || argc > 3){
         fprintf(stderr, "Program expects 1 or 2 arguments but recieved %i\n", (argc-1));
         fprintf(stderr, "Correct usage: ./8q N or ./8q -verbose N\n");
@@ -53,6 +52,29 @@ bool valid_number(char val[]){
     return false;
 }
 
+/*
+----------------
+INITIALISE BOARD
+----------------
+*/
+void init_board(state* position, int size){
+    for(int row = 0;row<size;row++){
+        for(int col = 0;col<size;col++){
+            position->board[row][col] = QUEEN_UNCOVERED;
+        }
+    }
+}
+
+void print_board(state* position, int size){
+    for(int row = 0;row<size;row++){
+        for(int col = 0;col<size;col++){
+            printf("%c",position->board[row][col]);
+        }
+        printf("\n");
+    }
+}
+
+
 
 /*
 -------
@@ -73,11 +95,34 @@ void test(){
 
     char* test_args[] = {"program","8"};
     user_input(test_argc=2,test_args,&test_N,&test_verbose);
+    //printf("Size: %i, Verbose: %i\n", test_N, test_verbose);
     assert(test_N == 8);
     assert(!test_verbose);
 
     char* test_args_verbose[] = {"program","-verbose","8"};
     user_input(test_argc=3,test_args_verbose,&test_N,&test_verbose);
+    //printf("Size: %i, Verbose: %i\n", test_N, test_verbose);
     assert(test_N == 8);
-    assert(test_verbose);
+    assert(test_verbose == true);
+
+    state test_state = {.queens = 0,
+                        .board = {{'\0'}}};
+    init_board(&test_state,test_N);
+    for(int row = 0 ; row < test_N ; row++){
+        for(int col = 0 ; col < test_N ; col++){
+            assert(test_state.board[row][col] == QUEEN_UNCOVERED);
+        }
+    }
+    //print_board(&test_state,10);
+    //print_board(&test_state,test_N);
+
+    
+    
+
+
+
+    
+    
+    
+   
 }
