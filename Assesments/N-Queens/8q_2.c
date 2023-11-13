@@ -5,11 +5,11 @@ int main(int argc, char* argv[]){
     int size = 0;
     user_input(argc, argv, &size, &verbose);
 
-    state solution_space[MAX_SEARCH_SPACE];
+    state* solution_space[MAX_SEARCH_SPACE];
     long frontier = 0, index = 0;
 
     state first_state = init_state(size);
-    solution_space[0] = first_state;
+    solution_space[0] = &first_state;
 
 
 
@@ -70,6 +70,7 @@ INITIALISE/COPY/COMPARE STATES
 ------------------------------
 */
 state init_state(int size){
+    //TESTED
     state new_state = {.queens = 0,
                         .board = {{'\0'}}};
     for(int row = 0;row<size;row++){
@@ -80,24 +81,26 @@ state init_state(int size){
     return new_state;
 }
 
+bool state_cmp(state* state_one, state* state_two, int size){
+    // UNTESTED
+    for(int row = 0;row<size;row++){
+        for(int col = 0;col<size;col++){
+            if(state_one->board[row][col] != state_two->board[row][col]){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 void cpy_state(state old_state, state* new_state, int size){
+    //TESTED
     new_state->queens = old_state.queens;
     for(int row = 0;row<size;row++){
         for(int col = 0;col<size;col++){
             new_state->board[row][col] = old_state.board[row][col];
         }
     }
-}
-
-bool state_cmp(state* state_one, state* state_two, int size){
-    for(int row = 0;row<size;row++){
-        for(int col = 0;col<size;col++){
-            if(state_one->board[row][col] == state_two->board[row][col]){
-                return false;
-            }
-        }
-    }
-    return true;
 }
 
 void print_board(state* position, int size){
@@ -109,17 +112,89 @@ void print_board(state* position, int size){
     }
 }
 
+
+
+
+
+
 /*
 ---------------
 NEXT GENERATION
 ---------------
 */
 
-void next_gen(){
-    
+void next_gen(state* solution_space, long* frontier, long index, int size){
+
 }
 
 
+
+
+
+
+/*
+---------------
+QUEEN ADDITIONS
+---------------
+*/
+
+void row_explore(state* position, int row_index, int size){
+    //TESTED
+    for(int col = 0;col<size; col++){
+        if(position->board[row_index][col] == QUEEN_UNCOVERED){
+            position->board[row_index][col] = QUEEN_COVERED;
+        }
+    }
+}
+
+void col_explore(state* position, int col_index, int size){
+    //TESTED
+    for(int row = 0; row<size; row++){
+        if(position->board[row][col_index] == QUEEN_UNCOVERED){
+            position->board[row][col_index] = QUEEN_COVERED;
+        }
+    }
+}
+
+void diag_explore(state* position, int row_index, int col_index, int size){
+    //TESTED
+    int size_index = size-1;
+    for(int step = 1;step<size;step++){
+        // Step NE
+        if((row_index+step) <= size_index &&
+           (col_index+step) <= size_index &&
+           position->board[row_index+step][col_index+step] == QUEEN_UNCOVERED){
+            position->board[row_index+step][col_index+step] = QUEEN_COVERED;
+        }
+        // Step SW
+        if((row_index-step) >= 0 &&
+           (col_index-step) >= 0 &&
+           position->board[row_index-step][col_index-step] == QUEEN_UNCOVERED){
+            position->board[row_index-step][col_index-step] = QUEEN_COVERED;
+        }
+        // Step SE
+        if((row_index+step) <= size_index &&
+           (col_index-step) >= 0 &&
+           position->board[row_index+step][col_index-step] == QUEEN_UNCOVERED){
+            position->board[row_index+step][col_index-step] = QUEEN_COVERED;
+        }
+        // Step NW
+        if((row_index-step) >= 0 &&
+           (col_index+step) <= size_index &&
+           position->board[row_index-step][col_index+step] == QUEEN_UNCOVERED){
+            position->board[row_index-step][col_index+step] = QUEEN_COVERED;
+        }
+    }
+}
+
+void queen_adder(state* position,int row_index, int col_index, int size){
+    // Add a queen in coords given and, change all unexplored cells in range to explored, don't effect queen cells
+    position->board[row_index][col_index] = QUEEN;
+    row_explore(position, row_index, size);
+    col_explore(position, col_index, size);
+    diag_explore(position, row_index, col_index, size);
+
+}
 /*
 -------
 TESTING
@@ -153,17 +228,70 @@ void test(){
             assert(test_state.board[row][col] == QUEEN_UNCOVERED);
         }
     }
+
+    assert(state_cmp(&test_state, &test_state, test_N));
+
     test_state.board[0][0] = 'T';
     test_state.board[1][1] = 'E';
     test_state.board[2][2] = 'S';
     test_state.board[3][3] = 'T';
     //print_board(&test_state,test_N);
-    state test_state_cpy;
-    cpy_state(test_state,&test_state_cpy,test_N);
-    for(int i = 0;i<=3;i++){
-        assert(test_state.board[i][i] == test_state_cpy.board[i][i]);
-    }
+
     
+    state test_state_cpy = init_state(test_N);
+    assert(!state_cmp(&test_state, &test_state_cpy, test_N));
+
+
+    cpy_state(test_state,&test_state_cpy,test_N);
+    assert(state_cmp(&test_state, &test_state_cpy, test_N));
+
+
+
+    int test_row = 4, test_col = 3;
+    test_state.board[test_row][test_col] = QUEEN;
+    row_explore(&test_state,test_row,test_N);
+    assert(test_state.board[test_row][test_col] == QUEEN);
+    for(int i=0;i<test_N;i++){
+        if(i!=test_col){
+            assert(test_state.board[test_row][i] == QUEEN_COVERED);
+        }
+    }
+
+    col_explore(&test_state, test_col, test_N);
+
+    assert(test_state.board[test_row][test_col] == QUEEN);
+    for(int i=0;i<test_N;i++){
+        if(i!=test_row){
+            if(i == (test_row-1)){
+                assert(test_state.board[i][test_col] == 'T');
+            }
+            else{
+                assert(test_state.board[i][test_col] == QUEEN_COVERED);
+            }
+            
+        }
+        
+    }
+
+    test_state.board[1][0] = 'T';
+    diag_explore(&test_state, test_row, test_col, test_N);
+    
+    state comparison_state = {.queens = 0,
+                              .board = {{"TOOXOOOX"},
+                                        {"TEOXOOXO"},
+                                        {"OXSXOXOO"},
+                                        {"OOXTXOOO"},
+                                        {"XXXQXXXX"},
+                                        {"OOXXXOOO"},
+                                        {"OXOXOXOO"},
+                                        {"XOOXOOXO"}}
+    };
+    assert(state_cmp(&comparison_state, &test_state, test_N));
+    
+    test_state_cpy.board[1][0] = 'T';
+    queen_adder(&test_state_cpy,test_row,test_col,test_N);
+    //print_board(&test_state_cpy,test_N);
+    assert(state_cmp(&comparison_state, &test_state_cpy, test_N));
 
     
     

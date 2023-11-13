@@ -94,51 +94,51 @@ QUEEN ADDER
 -----------
 */
 
-state queen_adder(state* old_position,int row_index, int col_index, int size){
+void queen_adder(state* old_position,int row_index, int col_index, int size){
     // Add a queen in coords given and, change all unexplored cells in range to explored, don't effect queen cells
-    position->[row_index][col_index] = QUEEN;
-    row_explore(board, row_index, size);
-    col_explore(board, col_index, size);
-    diag_explore(board, row_index, col_index, size);
+    position->board[row_index][col_index] = QUEEN;
+    row_explore(old_position, row_index, size);
+    col_explore(old_position, col_index, size);
+    diag_explore(old_position, row_index, col_index, size);
 
 }
 
-state row_explore(state* position, int row_index, int size){
+void row_explore(state* position, int row_index, int size){
     for(int col = 0;col<size; col++){
-        if(position->[row_index][col] == QUEEN_UNCOVERED){
-            position->[row_index][col] = QUEEN_COVERED;
+        if(position->board[row_index][col] == QUEEN_UNCOVERED){
+            position->board[row_index][col] = QUEEN_COVERED;
         }
     }
 }
-state col_explore(state* position, int col_index, int size){
+void col_explore(state* position, int col_index, int size){
     for(int row = 0; row<size; row++){
-        if(position->[col_index][row] == QUEEN_UNCOVERED){
-            position->[col_index][row] = QUEEN_COVERED;
+        if(position->board[col_index][row] == QUEEN_UNCOVERED){
+            position->board[col_index][row] = QUEEN_COVERED;
         }
     }
 }
-state diag_explore(state* position, int row_index, int col_index, int size){
+void diag_explore(state* position, int row_index, int col_index, int size){
     int size_index = size-1;
     for(int step = 1;step<size;step++){
         if((row_index+step) < size_index &&
            (col_index+step) < size_index &&
-           position->[row_index+step][col_index+step] == QUEEN_UNCOVERED){
-            position->[row_index+step][col_index+step] = QUEEN_COVERED;
+           position->board[row_index+step][col_index+step] == QUEEN_UNCOVERED){
+            position->board[row_index+step][col_index+step] = QUEEN_COVERED;
         }
         if((row_index-step) > 0 &&
            (col_index-step) > 0 &&
-           position->[row_index-step][col_index-step] == QUEEN_UNCOVERED){
-            position->[row_index-step][col_index-step] = QUEEN_COVERED;
+           position->board[row_index-step][col_index-step] == QUEEN_UNCOVERED){
+            position->board[row_index-step][col_index-step] = QUEEN_COVERED;
         }
         if((row_index+step) < size_index &&
            (col_index-step) > 0 &&
-           position->[row_index+step][col_index-step] == QUEEN_UNCOVERED){
-            position->[row_index+step][col_index-step] = QUEEN_COVERED;
+           position->board[row_index+step][col_index-step] == QUEEN_UNCOVERED){
+            position->board[row_index+step][col_index-step] = QUEEN_COVERED;
         }
         if((row_index-step) > 0 &&
            (col_index+step) < size_index &&
-           position->[row_index-step][col_index+step] == QUEEN_UNCOVERED){
-            position->[row_index-step][col_index+step] = QUEEN_COVERED;
+           position->board[row_index-step][col_index+step] == QUEEN_UNCOVERED){
+            position->board[row_index-step][col_index+step] = QUEEN_COVERED;
         }
     }
 }
