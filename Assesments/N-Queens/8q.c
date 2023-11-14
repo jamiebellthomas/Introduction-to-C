@@ -232,7 +232,12 @@ void verbose_output(state position, int size){
     for(int col = 0;col<size;col++){
         for(int row = 0;row<size;row++){
             if(position.board[row][col] == QUEEN){
-                printf("%i",(row+1));
+                if(row == MAX_GRID-1){
+                    printf("A");
+                }
+                else{
+                    printf("%i",(row+1));
+                }
             }
         }
     }
