@@ -1,29 +1,26 @@
 #include "8q_2.h"
 int main(int argc, char* argv[]){
     test();
+
+
     bool verbose = false;
     int size = 0;
     user_input(argc, argv, &size, &verbose);
 
     state* solution_space = (state*)malloc(sizeof(state)*MAX_SEARCH_SPACE);
-    long frontier = 1, index = 0;
-
+    if(solution_space == NULL){
+        fprintf(stderr,"Memory Allocation Failed.\n");
+         exit(EXIT_FAILURE);
+    }
+    //
+    long frontier = 1, index = 0, solution_counter = 0;
     state state_holder = init_state(size);
     solution_space[0] = state_holder;
     while(index<=frontier){
-        next_gen(solution_space,&frontier, &index, size, &state_holder);
+        next_gen(solution_space,&frontier, &index, size, 
+                 &state_holder, verbose, &solution_counter);
     }
-    int counter = 0;
-    for(int i = 0;i<frontier;i++){
-        if(solution_space[i].queens == size){
-            counter++;
-            print_board(&(solution_space[i]), size);
-            printf("\n");
-        }
-    }
-    printf("%i\n", counter);
-    printf("%li", frontier);
-    free(solution_space);
+    printf("%li solutions\n", solution_counter);
 }
 /*
 ----------
@@ -81,7 +78,6 @@ INITIALISE/COPY/COMPARE STATES
 ------------------------------
 */
 state init_state(int size){
-    //TESTED
     state new_state = {.queens = 0,
                         .board = {{'\0'}}};
     for(int row = 0;row<size;row++){
@@ -93,7 +89,6 @@ state init_state(int size){
 }
 
 bool state_cmp(state state_one, state state_two, int size){
-    // TESTED
     for(int row = 0;row<size;row++){
         for(int col = 0;col<size;col++){
             if(state_one.board[row][col] != state_two.board[row][col]){
@@ -105,7 +100,6 @@ bool state_cmp(state state_one, state state_two, int size){
 }
 
 void cpy_state(state old_state, state* new_state, int size){
-    //TESTED
     new_state->queens = old_state.queens;
     for(int row = 0;row<size;row++){
         for(int col = 0;col<size;col++){
@@ -131,7 +125,6 @@ QUEEN ADDITIONS
 */
 
 void row_explore(state* position, int row_index, int size){
-    //TESTED
     for(int col = 0;col<size; col++){
         if(position->board[row_index][col] == QUEEN_UNCOVERED){
             position->board[row_index][col] = QUEEN_COVERED;
@@ -140,7 +133,6 @@ void row_explore(state* position, int row_index, int size){
 }
 
 void col_explore(state* position, int col_index, int size){
-    //TESTED
     for(int row = 0; row<size; row++){
         if(position->board[row][col_index] == QUEEN_UNCOVERED){
             position->board[row][col_index] = QUEEN_COVERED;
@@ -149,7 +141,6 @@ void col_explore(state* position, int col_index, int size){
 }
 
 void diag_explore(state* position, int row_index, int col_index, int size){
-    //TESTED
     int size_index = size-1;
     for(int step = 1;step<size;step++){
         // Step NE
@@ -180,7 +171,8 @@ void diag_explore(state* position, int row_index, int col_index, int size){
 }
 
 void queen_adder(state* position,int row_index, int col_index, int size){
-    // Add a queen in coords given and, change all unexplored cells in range to explored, don't effect queen cells
+    // Add a queen in coords given and, change all unexplored cells in range to explored
+    // Only effects unexplored cells
     position->board[row_index][col_index] = QUEEN;
     row_explore(position, row_index, size);
     col_explore(position, col_index, size);
@@ -204,7 +196,8 @@ bool unique_state(state solution_space[MAX_SEARCH_SPACE], long frontier, state c
     return true;
 }
 
-void next_gen(state solution_space[MAX_SEARCH_SPACE], long* frontier, long* index, int size, state* state_holder){
+void next_gen(state solution_space[MAX_SEARCH_SPACE], long* frontier, long* index, 
+              int size, state* state_holder, bool verbose, long* solution_counter){
     cpy_state(solution_space[*index], state_holder, size);
     for(int row = 0;row<size;row++){
         for(int col = 0;col<size;col++){
@@ -214,6 +207,13 @@ void next_gen(state solution_space[MAX_SEARCH_SPACE], long* frontier, long* inde
                 if(unique_state(solution_space,*frontier,*state_holder,size)){
                     solution_space[(int)(*frontier)] = *state_holder;
                     (*frontier)++;
+                    if(state_holder->queens == size){
+                        (*solution_counter)++;
+                        if(verbose){
+                            verbose_output(*state_holder, size);
+                        }
+                    }
+
                 }
                 cpy_state(solution_space[*index], state_holder, size);
             }
@@ -222,7 +222,22 @@ void next_gen(state solution_space[MAX_SEARCH_SPACE], long* frontier, long* inde
     (*index)++;
 }
 
+/*
+--------------
+VERBOSE OUTPUT
+--------------
+*/
 
+void verbose_output(state position, int size){
+    for(int col = 0;col<size;col++){
+        for(int row = 0;row<size;row++){
+            if(position.board[row][col] == QUEEN){
+                printf("%i",(row+1));
+            }
+        }
+    }
+    printf("\n");
+}
 
 /*
 -------
@@ -231,33 +246,41 @@ TESTING
 */
 void test(){
 
-    // First checks are making sure valid function stops bad inputs and
-    // allows good ones
+    // First checks are making sure valid_number only allows
+    // numerical values from 1-10.
     assert(!valid_number("hello"));
     assert(!valid_number("123"));
     assert(!valid_number("10a"));
     assert(valid_number("5"));
-
+    
+    //Initialise a good set of non-verbose arguments and ensure
+    // They are correctly translated to the relevant variable(s)
     int test_N = 0, test_argc;
     bool test_verbose = false;
-
     char* test_args[] = {"program","8"};
     user_input(test_argc=2,test_args,&test_N,&test_verbose);
     assert(test_N == 8);
     assert(!test_verbose);
 
+    //Initialise a good set of verbose arguments and ensure
+    // They are correctly translated to the relevant variable(s)
     char* test_args_verbose[] = {"program","-verbose","8"};
     user_input(test_argc=3,test_args_verbose,&test_N,&test_verbose);
     assert(test_N == 8);
-    assert(test_verbose == true);
+    assert(test_verbose);
+    // Bad arguments were tested via command line as they trigger a 
+    // program exit.
 
+
+    // Ensure the init_state function creates a state struct with an
+    // empty board of the correct size. 
     state test_state = init_state(test_N);
     for(int row = 0 ; row < test_N ; row++){
         for(int col = 0 ; col < test_N ; col++){
             assert(test_state.board[row][col] == QUEEN_UNCOVERED);
         }
     }
-
+    // Compare a state to itself and make sure they are marked as identical
     assert(state_cmp(test_state, test_state, test_N));
 
     test_state.board[0][0] = 'T';
@@ -268,14 +291,19 @@ void test(){
 
     
     state test_state_cpy = init_state(test_N);
+
+    // Alter the original board, create a new board and ensure
+    // these two boards are markes as different
     assert(!state_cmp(test_state, test_state_cpy, test_N));
 
-
+    // Copy the old board to the new board and ensure these two boards are
+    // now identical (this can be done with the new tested state_cmp function)
     cpy_state(test_state,&test_state_cpy,test_N);
     assert(state_cmp(test_state, test_state_cpy, test_N));
 
 
-
+    // Insert a queen into the given index, apply each of the exploration
+    // functions seperately, comparing the results with the known output. 
     int test_row = 4, test_col = 3;
     test_state.board[test_row][test_col] = QUEEN;
     row_explore(&test_state,test_row,test_N);
@@ -287,7 +315,6 @@ void test(){
     }
 
     col_explore(&test_state, test_col, test_N);
-
     assert(test_state.board[test_row][test_col] == QUEEN);
     for(int i=0;i<test_N;i++){
         if(i!=test_row){
@@ -317,17 +344,25 @@ void test(){
     };
     assert(state_cmp(comparison_state, test_state, test_N));
     
+    // Then apply the overall function that calls these 3 individual functions and
+    // ensure this returns an identical result
     test_state_cpy.board[1][0] = 'T';
     queen_adder(&test_state_cpy,test_row,test_col,test_N);
     //print_board(&test_state_cpy,test_N);
     assert(state_cmp(comparison_state, test_state_cpy, test_N));
 
+
+    // Initialise a dummy solution space with slightly varying boards within it
     state* test_solution_space = (state*)malloc(sizeof(state)*TEST_SEARCH_SPACE);
     for(int i = 1;i<TEST_SEARCH_SPACE;i++){
         test_solution_space[i] = init_state(test_N);
         test_solution_space[i].board[0][0] = (i-1)+'A';
     }
-
+    
+    // Initialise a new state which we know isn't in the dummy solution space
+    // and a state that we know is in there
+    // and verify the unique_state function can identify which one is contained within
+    // the solution space and which is not. 
     state test_unique_state = init_state(test_N);
     test_unique_state.board[0][0] = TEST_SEARCH_SPACE+'A';
     state test_non_unique_state = init_state(test_N);
@@ -336,14 +371,21 @@ void test(){
     assert(!unique_state(test_solution_space, TEST_SEARCH_SPACE, test_non_unique_state, test_N));
     free(test_solution_space);
 
+
+    // Initialise a new solution space, except this one will only have 1 black board at the start
+    // (just like the real code will do)
     state* test_next_gen_space = (state*)malloc(sizeof(state)*TEST_SEARCH_SPACE);
     
-    long test_frontier = 1, test_index = 0;
+    long test_frontier = 1, test_index = 0, test_solution_counter = 0;
     int test_size = 3;
 
     state test_state_holder = init_state(test_size);
     test_next_gen_space[0] = test_state_holder;
-    next_gen(test_next_gen_space,&test_frontier, &test_index, test_size, &test_state_holder);
+
+    // Call the next_gen function on this initial empty board and ensure what is returned is a series of boards
+    // of length (size)^2 with each having a unique set of queen index coordinates. 
+    next_gen(test_next_gen_space,&test_frontier, &test_index, test_size, 
+             &test_state_holder, test_verbose, &test_solution_counter);
 
     assert(test_frontier == (test_size*test_size+1));
     int first_frontier = test_size*test_size+1;
@@ -356,8 +398,10 @@ void test(){
 
         }
     }
-
-    next_gen(test_next_gen_space,&test_frontier, &test_index, test_size, &test_state_holder);
+    // Run next_gen on the second entry and ensure the first value of the next generation is
+    // the same as the known output. 
+    next_gen(test_next_gen_space,&test_frontier, &test_index, test_size, 
+             &test_state_holder, test_verbose, &test_solution_counter);
 
 
     state comparison_state_two = {.queens = 2,
