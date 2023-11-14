@@ -11,6 +11,7 @@
 #define QUEEN 'Q'
 #define QUEEN_COVERED 'X'
 #define QUEEN_UNCOVERED 'O'
+#define TEST_SEARCH_SPACE 25
 struct state {
     int queens;
     char board[MAX_GRID][MAX_GRID];
@@ -21,10 +22,14 @@ typedef struct state state;
 void user_input(int argc, char* argv[], int* N, bool* verbose);
 bool valid_number(char val[]);
 void test();
-void init_board(char** board, int size);
-void print_board(char** board, int size);
-void queen_adder(char** board,int row_index, int col_index, int size);
-void row_explore(char** board,int row_index, int size);
-void col_explore(char** board,int col_index, int size);
-void diag_explore(char** board,int row_index, int col_index, int size);
+state init_state(int size);
+bool state_cmp(state state_one, state state_two, int size);
+void cpy_state(state old_state, state* new_state, int size);
+void print_board(state* position, int size);
+void row_explore(state* position, int row_index, int size);
+void col_explore(state* position, int col_index, int size);
+void queen_adder(state* position,int row_index, int col_index, int size);
+bool unique_state(state solution_space[MAX_SEARCH_SPACE], long frontier, state current_state, int size);
+void next_gen(state solution_space[MAX_SEARCH_SPACE], long* frontier, long* index, int size, state* state_holder, bool verbose, long* solution_counter);
+void verbose_output(state position, int size);
 
