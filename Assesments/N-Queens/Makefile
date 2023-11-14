@@ -14,7 +14,7 @@ CC := clang
 	$(CC) 8q_2.c $(OPTIM) -o 8q
 
 8q_san: 8q_2.c 8q_2.h
-	$(CC) 8q.c $(SANITIZE) -o 8q_san
+	$(CC) 8q_2.c $(SANITIZE) -o 8q_san
 
 all: 8q 8q_san
 

@@ -5,14 +5,25 @@ int main(int argc, char* argv[]){
     int size = 0;
     user_input(argc, argv, &size, &verbose);
 
-    state* solution_space[MAX_SEARCH_SPACE];
-    long frontier = 0, index = 0;
+    state* solution_space = (state*)malloc(sizeof(state)*MAX_SEARCH_SPACE);
+    long frontier = 1, index = 0;
 
-    state first_state = init_state(size);
-    solution_space[0] = &first_state;
-
-
-
+    state state_holder = init_state(size);
+    solution_space[0] = state_holder;
+    while(index<=frontier){
+        next_gen(solution_space,&frontier, &index, size, &state_holder);
+    }
+    int counter = 0;
+    for(int i = 0;i<frontier;i++){
+        if(solution_space[i].queens == size){
+            counter++;
+            print_board(&(solution_space[i]), size);
+            printf("\n");
+        }
+    }
+    printf("%i\n", counter);
+    printf("%li", frontier);
+    free(solution_space);
 }
 /*
 ----------
@@ -81,11 +92,11 @@ state init_state(int size){
     return new_state;
 }
 
-bool state_cmp(state* state_one, state* state_two, int size){
-    // UNTESTED
+bool state_cmp(state state_one, state state_two, int size){
+    // TESTED
     for(int row = 0;row<size;row++){
         for(int col = 0;col<size;col++){
-            if(state_one->board[row][col] != state_two->board[row][col]){
+            if(state_one.board[row][col] != state_two.board[row][col]){
                 return false;
             }
         }
@@ -111,25 +122,6 @@ void print_board(state* position, int size){
         printf("\n");
     }
 }
-
-
-
-
-
-
-/*
----------------
-NEXT GENERATION
----------------
-*/
-
-void next_gen(state* solution_space, long* frontier, long index, int size){
-
-}
-
-
-
-
 
 
 /*
@@ -195,6 +187,43 @@ void queen_adder(state* position,int row_index, int col_index, int size){
     diag_explore(position, row_index, col_index, size);
 
 }
+
+
+/*
+---------------
+NEXT GENERATION
+---------------
+*/
+
+bool unique_state(state solution_space[MAX_SEARCH_SPACE], long frontier, state current_state, int size){
+    for(int i = 0; i<frontier; i++){
+        if(state_cmp(solution_space[i],current_state,size)){
+            return false;
+        }
+    }
+    return true;
+}
+
+void next_gen(state solution_space[MAX_SEARCH_SPACE], long* frontier, long* index, int size, state* state_holder){
+    cpy_state(solution_space[*index], state_holder, size);
+    for(int row = 0;row<size;row++){
+        for(int col = 0;col<size;col++){
+            if(state_holder->board[row][col] == QUEEN_UNCOVERED){
+                queen_adder(state_holder, row, col, size); 
+                (state_holder->queens)++;
+                if(unique_state(solution_space,*frontier,*state_holder,size)){
+                    solution_space[(int)(*frontier)] = *state_holder;
+                    (*frontier)++;
+                }
+                cpy_state(solution_space[*index], state_holder, size);
+            }
+        }
+    }
+    (*index)++;
+}
+
+
+
 /*
 -------
 TESTING
@@ -229,7 +258,7 @@ void test(){
         }
     }
 
-    assert(state_cmp(&test_state, &test_state, test_N));
+    assert(state_cmp(test_state, test_state, test_N));
 
     test_state.board[0][0] = 'T';
     test_state.board[1][1] = 'E';
@@ -239,11 +268,11 @@ void test(){
 
     
     state test_state_cpy = init_state(test_N);
-    assert(!state_cmp(&test_state, &test_state_cpy, test_N));
+    assert(!state_cmp(test_state, test_state_cpy, test_N));
 
 
     cpy_state(test_state,&test_state_cpy,test_N);
-    assert(state_cmp(&test_state, &test_state_cpy, test_N));
+    assert(state_cmp(test_state, test_state_cpy, test_N));
 
 
 
@@ -286,20 +315,58 @@ void test(){
                                         {"OXOXOXOO"},
                                         {"XOOXOOXO"}}
     };
-    assert(state_cmp(&comparison_state, &test_state, test_N));
+    assert(state_cmp(comparison_state, test_state, test_N));
     
     test_state_cpy.board[1][0] = 'T';
     queen_adder(&test_state_cpy,test_row,test_col,test_N);
     //print_board(&test_state_cpy,test_N);
-    assert(state_cmp(&comparison_state, &test_state_cpy, test_N));
+    assert(state_cmp(comparison_state, test_state_cpy, test_N));
 
+    state* test_solution_space = (state*)malloc(sizeof(state)*TEST_SEARCH_SPACE);
+    for(int i = 1;i<TEST_SEARCH_SPACE;i++){
+        test_solution_space[i] = init_state(test_N);
+        test_solution_space[i].board[0][0] = (i-1)+'A';
+    }
+
+    state test_unique_state = init_state(test_N);
+    test_unique_state.board[0][0] = TEST_SEARCH_SPACE+'A';
+    state test_non_unique_state = init_state(test_N);
+    test_non_unique_state.board[0][0] = 'A';
+    assert(unique_state(test_solution_space, TEST_SEARCH_SPACE, test_unique_state, test_N));
+    assert(!unique_state(test_solution_space, TEST_SEARCH_SPACE, test_non_unique_state, test_N));
+    free(test_solution_space);
+
+    state* test_next_gen_space = (state*)malloc(sizeof(state)*TEST_SEARCH_SPACE);
     
-    
+    long test_frontier = 1, test_index = 0;
+    int test_size = 3;
+
+    state test_state_holder = init_state(test_size);
+    test_next_gen_space[0] = test_state_holder;
+    next_gen(test_next_gen_space,&test_frontier, &test_index, test_size, &test_state_holder);
+
+    assert(test_frontier == (test_size*test_size+1));
+    int first_frontier = test_size*test_size+1;
+    assert(test_index == 1);
+    int test_counter = 1;
+    for(int test_row = 0;test_row<test_size;test_row++){
+        for(int test_col = 0;test_col<test_size;test_col++){
+            assert(test_next_gen_space[test_counter].board[test_row][test_col] == QUEEN);
+            test_counter++;
+
+        }
+    }
+
+    next_gen(test_next_gen_space,&test_frontier, &test_index, test_size, &test_state_holder);
 
 
+    state comparison_state_two = {.queens = 2,
+                              .board = {{"QXX"},
+                                        {"XXQ"},
+                                        {"XXX"}}
+    };
+    assert(state_cmp(comparison_state_two, test_next_gen_space[first_frontier],test_size));
 
-    
-    
-    
-   
+    free(test_next_gen_space);
 }
+
