@@ -8,9 +8,10 @@
 #define QUEEN 'Q'
 #define QUEEN_COVERED 'X'
 #define QUEEN_UNCOVERED 'O'
-#define MAX_GRID 15
-// 10x10 has 724 solutions and this is board size limit, so this will be the first limit. 
-#define SOLUTION_LIMIT 724
+#define MIN_GRID 1
+#define MAX_GRID 13
+// 10x10 has 724 solutions, so this will be the solution space limit 
+#define SOLUTION_LIMIT 73712
 #define MEM_FACTOR 4
 
 struct state {
@@ -30,7 +31,10 @@ void queen_adder(state* position,int row_index, int col_index, int size);
 void queen_removal(state* position,int row_index, int col_index, int size);
 void covered_reset(state* position, int size);
 void queen_reset(state* position, int size);
-void recursion(state solution_space[SOLUTION_LIMIT], int* solution_count, state* state_holder, int col, int size);
+void recursion(state solution_space[SOLUTION_LIMIT], int* solution_count, 
+               state* state_holder, int col, int size, bool verbose);
+void verbose_output(state position, int size);
+
 
 void test();
 void print_board(state* position, int size);
@@ -38,18 +42,21 @@ void print_board(state* position, int size);
 
 int main(int argc, char* argv[]){
     test();
+
     bool verbose = false;
     int size = 0, solution_count = 0, init_col = 0;
-    long solution_limit = SOLUTION_LIMIT;
     user_input(argc, argv, &size, &verbose);
-    printf("%i", size);
+
     state* solution_space = (state*)malloc(sizeof(state)*SOLUTION_LIMIT);
     if(solution_space == NULL){
         fprintf(stderr,"Memory Allocation Failed.\n");
          exit(EXIT_FAILURE);
     }
+
     state state_holder = init_state(size);
-    recursion(solution_space, &solution_count, &state_holder, init_col, size);
+    recursion(solution_space, &solution_count, &state_holder, init_col, size, verbose);
+
+    printf("%i solutions\n", solution_count);
     free(solution_space);
 }
 
@@ -79,13 +86,13 @@ void user_input(int argc, char* argv[], int* N, bool* verbose){
             *N = atoi(argv[1]);
             return;
         }
-        fprintf(stderr, "Numerical argument must be an integer between 1 and 10.\n");
+        fprintf(stderr, "Numerical argument must be an integer between 1 and %i.\n", MAX_GRID);
         exit(EXIT_FAILURE);
     }
 
     else{
         if(!valid_number(argv[2])){
-            fprintf(stderr, "Numerical argument must be an integer between 1 and 10.\n");
+            fprintf(stderr, "Numerical argument must be an integer between 1 and %i.\n", MAX_GRID);
             exit(EXIT_FAILURE);
         }
         if(strcmp(argv[1],VERBOSE_FLAG)){
@@ -107,7 +114,7 @@ bool valid_number(char val[]){
         }
     }
     // Second check is to make sure the given number is between 1 and 10.
-    if(atoi(val) <= 12 && atoi(val) >= 1){
+    if(atoi(val) <= MAX_GRID && atoi(val) >= MIN_GRID){
         return true;
     }
     return false;
@@ -237,22 +244,46 @@ RECURSIVE BACKTRACK
 -------------------
 */
 
-void recursion(state solution_space[SOLUTION_LIMIT], int* solution_count, state* state_holder, int col, int size){
+void recursion(state solution_space[SOLUTION_LIMIT], int* solution_count, 
+               state* state_holder, int col, int size, bool verbose){
     if(state_holder->queens == size){
         solution_space[*solution_count] = *state_holder;
         (*solution_count)++;
-        printf("%i\n", *solution_count);
+        if(verbose){
+            verbose_output(*state_holder, size);
+        }
         return;
     }
     for(int row = 0; row<size; row++){
         if(state_holder->board[row][col] == QUEEN_UNCOVERED){
             queen_adder(state_holder, row, col, size);
-            recursion(solution_space, solution_count, state_holder, (col+1), size);
+            recursion(solution_space, solution_count, 
+                      state_holder, (col+1), size, verbose);
             queen_removal(state_holder, row, col, size);
         }
     }
 }
 
+/*
+--------------
+VERBOSE OUTPUT
+--------------
+*/
+void verbose_output(state position, int size){
+    for(int col = 0;col<size;col++){
+        for(int row = 0;row<size;row++){
+            if(position.board[row][col] == QUEEN){
+                if(row == MAX_GRID-1){
+                    printf("A");
+                }
+                else{
+                    printf("%i",(row+1));
+                }
+            }
+        }
+    }
+    printf("\n");
+}
 /*
 -------
 TESTING

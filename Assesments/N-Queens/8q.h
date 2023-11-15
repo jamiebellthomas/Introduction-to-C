@@ -6,6 +6,7 @@
 #include <string.h>
 
 #define MAX_GRID 10
+#define MIN_GRID 1
 #define MAX_SEARCH_SPACE 1000000
 #define VERBOSE_FLAG "-verbose"
 #define QUEEN 'Q'

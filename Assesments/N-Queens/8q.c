@@ -2,7 +2,6 @@
 int main(int argc, char* argv[]){
     test();
 
-
     bool verbose = false;
     int size = 0;
     user_input(argc, argv, &size, &verbose);
@@ -16,7 +15,7 @@ int main(int argc, char* argv[]){
     long frontier = 1, index = 0, solution_counter = 0;
     state state_holder = init_state(size);
     solution_space[0] = state_holder;
-    while(index<=frontier){
+    while(index<frontier){
         next_gen(solution_space,&frontier, &index, size, 
                  &state_holder, verbose, &solution_counter);
     }
@@ -66,7 +65,7 @@ bool valid_number(char val[]){
         }
     }
     // Second check is to make sure the given number is between 1 and 10.
-    if(atoi(val) <= 10 && atoi(val) >= 1){
+    if(atoi(val) <= MAX_GRID && atoi(val) >= MIN_GRID){
         return true;
     }
     return false;
@@ -174,6 +173,8 @@ void queen_adder(state* position,int row_index, int col_index, int size){
     // Add a queen in coords given and, change all unexplored cells in range to explored
     // Only effects unexplored cells
     position->board[row_index][col_index] = QUEEN;
+    (position->queens)++;
+
     row_explore(position, row_index, size);
     col_explore(position, col_index, size);
     diag_explore(position, row_index, col_index, size);
@@ -203,9 +204,8 @@ void next_gen(state solution_space[MAX_SEARCH_SPACE], long* frontier, long* inde
         for(int col = 0;col<size;col++){
             if(state_holder->board[row][col] == QUEEN_UNCOVERED){
                 queen_adder(state_holder, row, col, size); 
-                (state_holder->queens)++;
                 if(unique_state(solution_space,*frontier,*state_holder,size)){
-                    solution_space[(int)(*frontier)] = *state_holder;
+                    solution_space[(*frontier)] = *state_holder;
                     (*frontier)++;
                     if(state_holder->queens == size){
                         (*solution_counter)++;
@@ -417,5 +417,7 @@ void test(){
     assert(state_cmp(comparison_state_two, test_next_gen_space[first_frontier],test_size));
 
     free(test_next_gen_space);
+
+    // verbose_output function was tested via command line as output is only printed 
 }
 
