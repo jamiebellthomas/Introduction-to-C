@@ -12,7 +12,7 @@ int main(int argc, char* argv[]){
         fprintf(stderr,"Memory Allocation Failed.\n");
          exit(EXIT_FAILURE);
     }
-    //
+    
     long frontier = 1, index = 0, solution_counter = 0;
     state state_holder = init_state(size);
     solution_space[0] = state_holder;

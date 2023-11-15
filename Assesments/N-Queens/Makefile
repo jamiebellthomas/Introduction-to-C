@@ -28,7 +28,7 @@ extension: extension.c
 	$(CC) extension.c $(OPTIM) -o extension
 
 extension_san: extension.c
-	$(CC) extension.c $(OPTIM) -o extension_san
+	$(CC) extension.c $(SANITIZE) -o extension_san
 # Crete a .zip file using ALL files in this directory
 zip: 8q.c 8q.h 
 	zip -r 8q.zip 8q.c 8q.h Makefile # extension.txt extension.c

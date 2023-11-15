@@ -8,12 +8,17 @@
 #define QUEEN 'Q'
 #define QUEEN_COVERED 'X'
 #define QUEEN_UNCOVERED 'O'
-#define MAX_GRID 10
+#define MAX_GRID 15
+// 10x10 has 724 solutions and this is board size limit, so this will be the first limit. 
+#define SOLUTION_LIMIT 724
+#define MEM_FACTOR 4
+
 struct state {
     int queens;
     char board[MAX_GRID][MAX_GRID];
 };
 typedef struct state state;
+
 // Prototypes:
 void user_input(int argc, char* argv[], int* N, bool* verbose);
 bool valid_number(char val[]);
@@ -25,15 +30,38 @@ void queen_adder(state* position,int row_index, int col_index, int size);
 void queen_removal(state* position,int row_index, int col_index, int size);
 void covered_reset(state* position, int size);
 void queen_reset(state* position, int size);
+void recursion(state solution_space[SOLUTION_LIMIT], int* solution_count, state* state_holder, int col, int size);
 
 void test();
+void print_board(state* position, int size);
 
 
 int main(int argc, char* argv[]){
     test();
-    
+    bool verbose = false;
+    int size = 0, solution_count = 0, init_col = 0;
+    long solution_limit = SOLUTION_LIMIT;
+    user_input(argc, argv, &size, &verbose);
+    printf("%i", size);
+    state* solution_space = (state*)malloc(sizeof(state)*SOLUTION_LIMIT);
+    if(solution_space == NULL){
+        fprintf(stderr,"Memory Allocation Failed.\n");
+         exit(EXIT_FAILURE);
+    }
+    state state_holder = init_state(size);
+    recursion(solution_space, &solution_count, &state_holder, init_col, size);
+    free(solution_space);
 }
 
+
+void print_board(state* position, int size){
+    for(int row = 0;row<size;row++){
+        for(int col = 0;col<size;col++){
+            printf("%c",position->board[row][col]);
+        }
+        printf("\n");
+    }
+}
 
 /*
 ----------
@@ -79,7 +107,7 @@ bool valid_number(char val[]){
         }
     }
     // Second check is to make sure the given number is between 1 and 10.
-    if(atoi(val) <= 10 && atoi(val) >= 1){
+    if(atoi(val) <= 12 && atoi(val) >= 1){
         return true;
     }
     return false;
@@ -188,8 +216,8 @@ void queen_reset(state* position, int size){
     for(int row = 0; row<size; row++){
         for(int col =0; col<size; col++){
             if(position->board[row][col] == QUEEN){
-                (position->queens)--;
                 queen_adder(position, row, col, size);
+                (position->queens)--;
             }
         }
     }
@@ -202,6 +230,29 @@ void queen_removal(state* position,int row_index, int col_index, int size){
     queen_reset(position, size);
 
 }
+
+/*
+-------------------
+RECURSIVE BACKTRACK
+-------------------
+*/
+
+void recursion(state solution_space[SOLUTION_LIMIT], int* solution_count, state* state_holder, int col, int size){
+    if(state_holder->queens == size){
+        solution_space[*solution_count] = *state_holder;
+        (*solution_count)++;
+        printf("%i\n", *solution_count);
+        return;
+    }
+    for(int row = 0; row<size; row++){
+        if(state_holder->board[row][col] == QUEEN_UNCOVERED){
+            queen_adder(state_holder, row, col, size);
+            recursion(solution_space, solution_count, state_holder, (col+1), size);
+            queen_removal(state_holder, row, col, size);
+        }
+    }
+}
+
 /*
 -------
 TESTING
