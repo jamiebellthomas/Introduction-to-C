@@ -8,10 +8,11 @@
 #define QUEEN 'Q'
 #define QUEEN_COVERED 'X'
 #define QUEEN_UNCOVERED 'O'
+#define SINGLE_DIGIT_LIMIT 9
 #define MIN_GRID 1
-#define MAX_GRID 13
+#define MAX_GRID 15
 // 10x10 has 724 solutions, so this will be the solution space limit 
-#define SOLUTION_LIMIT 73712
+#define SOLUTION_LIMIT 2279184
 #define MEM_FACTOR 4
 
 struct state {
@@ -20,6 +21,18 @@ struct state {
 };
 typedef struct state state;
 
+struct solution_space {
+    state solution;
+    struct solution_space* next;
+};
+typedef struct solution_space solution_space;
+
+
+struct linked_list_info {
+    long length;
+    solution_space* start;
+}
+
 // Prototypes:
 void user_input(int argc, char* argv[], int* N, bool* verbose);
 bool valid_number(char val[]);
@@ -27,17 +40,11 @@ state init_state(int size);
 void row_explore(state* position, int row_index, int size);
 void col_explore(state* position, int col_index, int size);
 void diag_explore(state* position, int row_index, int col_index, int size);
-void queen_adder(state* position,int row_index, int col_index, int size);
-void queen_removal(state* position,int row_index, int col_index, int size);
-void covered_reset(state* position, int size);
-void queen_reset(state* position, int size);
+state queen_adder(state position,int row_index, int col_index, int size);
 void recursion(state solution_space[SOLUTION_LIMIT], int* solution_count, 
-               state* state_holder, int col, int size, bool verbose);
+               state state_holder, int col, int size, bool verbose);
 void verbose_output(state position, int size);
-
-
 void test();
-void print_board(state* position, int size);
 
 
 int main(int argc, char* argv[]){
@@ -54,20 +61,10 @@ int main(int argc, char* argv[]){
     }
 
     state state_holder = init_state(size);
-    recursion(solution_space, &solution_count, &state_holder, init_col, size, verbose);
+    recursion(solution_space, &solution_count, state_holder, init_col, size, verbose);
 
     printf("%i solutions\n", solution_count);
     free(solution_space);
-}
-
-
-void print_board(state* position, int size){
-    for(int row = 0;row<size;row++){
-        for(int col = 0;col<size;col++){
-            printf("%c",position->board[row][col]);
-        }
-        printf("\n");
-    }
 }
 
 /*
@@ -190,51 +187,16 @@ void diag_explore(state* position, int row_index, int col_index, int size){
     }
 }
 
-void queen_adder(state* position,int row_index, int col_index, int size){
+state queen_adder(state position,int row_index, int col_index, int size){
     // Add a queen in coords given and, change all unexplored cells in range to explored
     // Only effects unexplored cells
-    (position->queens)++;
-    position->board[row_index][col_index] = QUEEN;
-    row_explore(position, row_index, size);
-    col_explore(position, col_index, size);
-    diag_explore(position, row_index, col_index, size);
+    (position.queens)++;
+    position.board[row_index][col_index] = QUEEN;
+    row_explore(&position, row_index, size);
+    col_explore(&position, col_index, size);
+    diag_explore(&position, row_index, col_index, size);
 
-}
-
-/*
--------------
-QUEEN REMOVAL
--------------
-*/
-
-
-
-void covered_reset(state* position, int size){
-    for(int row = 0; row<size; row++){
-        for(int col =0; col<size; col++){
-            if(position->board[row][col] == QUEEN_COVERED){
-                position->board[row][col] = QUEEN_UNCOVERED;
-            }
-        }
-    }
-}
-
-void queen_reset(state* position, int size){
-    for(int row = 0; row<size; row++){
-        for(int col =0; col<size; col++){
-            if(position->board[row][col] == QUEEN){
-                queen_adder(position, row, col, size);
-                (position->queens)--;
-            }
-        }
-    }
-}
-
-void queen_removal(state* position,int row_index, int col_index, int size){
-    (position->queens)--;
-    position->board[row_index][col_index] = QUEEN_UNCOVERED;
-    covered_reset(position, size);
-    queen_reset(position, size);
+    return position;
 
 }
 
@@ -245,21 +207,22 @@ RECURSIVE BACKTRACK
 */
 
 void recursion(state solution_space[SOLUTION_LIMIT], int* solution_count, 
-               state* state_holder, int col, int size, bool verbose){
-    if(state_holder->queens == size){
-        solution_space[*solution_count] = *state_holder;
+               state state_holder, int col, int size, bool verbose){
+    
+    if(state_holder.queens == size){
+        solution_space[*solution_count] = state_holder;
         (*solution_count)++;
         if(verbose){
-            verbose_output(*state_holder, size);
+            verbose_output(state_holder, size);
         }
         return;
     }
     for(int row = 0; row<size; row++){
-        if(state_holder->board[row][col] == QUEEN_UNCOVERED){
-            queen_adder(state_holder, row, col, size);
+        if(state_holder.board[row][col] == QUEEN_UNCOVERED){
+            state next_state = queen_adder(state_holder, row, col, size); 
             recursion(solution_space, solution_count, 
-                      state_holder, (col+1), size, verbose);
-            queen_removal(state_holder, row, col, size);
+                      next_state, (col+1), size, verbose);
+            //queen_removal(state_holder, row, col, size);
         }
     }
 }
@@ -273,8 +236,8 @@ void verbose_output(state position, int size){
     for(int col = 0;col<size;col++){
         for(int row = 0;row<size;row++){
             if(position.board[row][col] == QUEEN){
-                if(row == MAX_GRID-1){
-                    printf("A");
+                if(row >= SINGLE_DIGIT_LIMIT){
+                    printf("%c",('A' + (row-SINGLE_DIGIT_LIMIT)));
                 }
                 else{
                     printf("%i",(row+1));
@@ -291,46 +254,6 @@ TESTING
 */
 
 void test(){
-
-    // This test function will only test functions that were
-    // not tested in 8q.c
-    int test_size = 5;
-    state test_state = init_state(test_size);
-
-   for(int step = 0; step<test_size; step++){
-        test_state.board[step][step]=QUEEN_COVERED;
-    }
-
-    covered_reset(&test_state, test_size);
-    
-    for(int row = 0; row<test_size; row++){
-        for(int col =0; col<test_size; col++){
-            assert(test_state.board[row][col] == QUEEN_UNCOVERED);
-        }
-    }
-
-    test_state.board[0][0] = QUEEN;
-    queen_reset(&test_state, test_size);
-    
-   for(int step = 1; step<test_size; step++){
-        assert(test_state.board[step][step] == QUEEN_COVERED);
-        assert(test_state.board[step][0] == QUEEN_COVERED);
-        assert(test_state.board[0][step] == QUEEN_COVERED);
-    }
-   // Create a new board, add queens to top left and bottom right
-   // Remove the one at the bottom right and the remaining board
-   // should be the same as the original board
-    state test_state_compare = init_state(test_size);
-    queen_adder(&test_state_compare, 0, 0, test_size);
-    queen_adder(&test_state_compare, (test_size-1), (test_size-1), test_size);
-
-    queen_removal(&test_state_compare, (test_size-1), (test_size-1), test_size);
-
-    for(int row = 0; row<test_size; row++){
-        for(int col =0; col<test_size; col++){
-            assert(test_state.board[row][col] == test_state_compare.board[row][col]);
-        }
-    }
-
-
+    // Only new function presented was the recursion and the output of this was verified in command line
 }
+
