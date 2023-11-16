@@ -10,10 +10,8 @@
 #define QUEEN_UNCOVERED 'O'
 #define SINGLE_DIGIT_LIMIT 9
 #define MIN_GRID 1
-#define MAX_GRID 15
-// 10x10 has 724 solutions, so this will be the solution space limit 
-#define SOLUTION_LIMIT 2279184
-#define MEM_FACTOR 4
+#define MAX_GRID 20
+
 
 struct state {
     int queens;
@@ -21,17 +19,13 @@ struct state {
 };
 typedef struct state state;
 
-struct solution_space {
-    state solution;
-    struct solution_space* next;
+struct solution {
+    state position;
+    struct solution* previous;
 };
-typedef struct solution_space solution_space;
+typedef struct solution solution;
 
 
-struct linked_list_info {
-    long length;
-    solution_space* start;
-}
 
 // Prototypes:
 void user_input(int argc, char* argv[], int* N, bool* verbose);
@@ -41,11 +35,14 @@ void row_explore(state* position, int row_index, int size);
 void col_explore(state* position, int col_index, int size);
 void diag_explore(state* position, int row_index, int col_index, int size);
 state queen_adder(state position,int row_index, int col_index, int size);
-void recursion(state solution_space[SOLUTION_LIMIT], int* solution_count, 
+void recursion(solution** latest_solution, int* solution_count, 
                state state_holder, int col, int size, bool verbose);
 void verbose_output(state position, int size);
 void test();
-
+void print_board(state* position, int size);
+solution* add_solution(solution* previous_solution, state current_solution);
+int solution_counter(solution* latest_solution);
+void free_list(solution* latest_solution);
 
 int main(int argc, char* argv[]){
     test();
@@ -54,17 +51,22 @@ int main(int argc, char* argv[]){
     int size = 0, solution_count = 0, init_col = 0;
     user_input(argc, argv, &size, &verbose);
 
-    state* solution_space = (state*)malloc(sizeof(state)*SOLUTION_LIMIT);
-    if(solution_space == NULL){
-        fprintf(stderr,"Memory Allocation Failed.\n");
-         exit(EXIT_FAILURE);
-    }
+ 
 
+
+    
+    solution* latest_solution = NULL;
+    solution** ptr = &latest_solution;
+    
     state state_holder = init_state(size);
-    recursion(solution_space, &solution_count, state_holder, init_col, size, verbose);
+    recursion(ptr, &solution_count, state_holder, init_col, size, verbose);
 
     printf("%i solutions\n", solution_count);
-    free(solution_space);
+
+
+    solution_count = solution_counter(latest_solution);
+    printf("%i solutions\n", solution_count);
+    free_list(latest_solution);
 }
 
 /*
@@ -206,11 +208,11 @@ RECURSIVE BACKTRACK
 -------------------
 */
 
-void recursion(state solution_space[SOLUTION_LIMIT], int* solution_count, 
+void recursion(solution** latest_solution, int* solution_count, 
                state state_holder, int col, int size, bool verbose){
     
     if(state_holder.queens == size){
-        solution_space[*solution_count] = state_holder;
+        *latest_solution = add_solution(*latest_solution, state_holder); 
         (*solution_count)++;
         if(verbose){
             verbose_output(state_holder, size);
@@ -220,7 +222,7 @@ void recursion(state solution_space[SOLUTION_LIMIT], int* solution_count,
     for(int row = 0; row<size; row++){
         if(state_holder.board[row][col] == QUEEN_UNCOVERED){
             state next_state = queen_adder(state_holder, row, col, size); 
-            recursion(solution_space, solution_count, 
+            recursion(latest_solution, solution_count, 
                       next_state, (col+1), size, verbose);
             //queen_removal(state_holder, row, col, size);
         }
@@ -247,13 +249,78 @@ void verbose_output(state position, int size){
     }
     printf("\n");
 }
+
+/*
+---------------------
+LINKED LIST FUNCTIONS
+---------------------
+*/
+
+solution* add_solution(solution* previous_solution, state current_solution){
+    solution* current_sol = (solution*)malloc(sizeof(solution));
+    current_sol->position = current_solution;
+    current_sol->previous = previous_solution;
+
+    return current_sol; 
+}
+
+int solution_counter(solution* latest_solution){
+    int counter = 0;
+    while(latest_solution != NULL){
+        counter++;
+        latest_solution = latest_solution->previous;
+    }
+    return counter;
+}
+
+void free_list(solution* latest_solution){
+    solution* next_ptr;
+    while(latest_solution != NULL){
+        next_ptr = latest_solution->previous;
+        free(latest_solution);
+        latest_solution = next_ptr;
+    }
+    free(latest_solution);
+}
 /*
 -------
 TESTING
 -------
 */
-
+void print_board(state* position, int size){
+    for(int row = 0;row<size;row++){
+        for(int col = 0;col<size;col++){
+            printf("%c",position->board[row][col]);
+        }
+        printf("\n");
+    }
+}
 void test(){
-    // Only new function presented was the recursion and the output of this was verified in command line
+    solution* latest_solution = NULL;
+    state test_state = init_state(8);
+    int iterations = 3;
+    for(int count = 0; count < iterations; count++){
+        test_state.board[0][0] = 'A' + count;
+        latest_solution = add_solution(latest_solution, test_state);
+    }
+    assert(solution_counter(latest_solution) == iterations);
+    solution* tmp; 
+    for(int count = 0; count < iterations; count++){
+
+        assert(latest_solution->position.board[0][0] == ('A' + (iterations-count-1)));
+        tmp = latest_solution->previous;
+        free(latest_solution);
+        latest_solution = tmp;
+    }
+
+    
+
+    
+    
+
+
+
+
+
 }
 
