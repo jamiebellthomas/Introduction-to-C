@@ -29,6 +29,9 @@ extension: extension.c
 
 extension_san: extension.c
 	$(CC) extension.c $(SANITIZE) -o extension_san
+
+extrun:
+	./extension -verbose -fundamental 10
 # Crete a .zip file using ALL files in this directory
 zip: 8q.c 8q.h 
 	zip -r 8q.zip 8q.c 8q.h Makefile # extension.txt extension.c

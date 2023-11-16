@@ -20,6 +20,9 @@ int main(int argc, char* argv[]){
                  &state_holder, verbose, &solution_counter);
     }
     printf("%li solutions\n", solution_counter);
+    free(solution_space);
+
+    return 0;
 }
 /*
 ----------
@@ -37,13 +40,13 @@ void user_input(int argc, char* argv[], int* N, bool* verbose){
             *N = atoi(argv[1]);
             return;
         }
-        fprintf(stderr, "Numerical argument must be an integer between 1 and 10.\n");
+        fprintf(stderr, "Numerical argument must be an integer between %i and %i.\n",MIN_GRID,MAX_GRID);
         exit(EXIT_FAILURE);
     }
 
     else{
         if(!valid_number(argv[2])){
-            fprintf(stderr, "Numerical argument must be an integer between 1 and 10.\n");
+            fprintf(stderr, "Numerical argument must be an integer between %i and %i.\n",MIN_GRID,MAX_GRID);
             exit(EXIT_FAILURE);
         }
         if(strcmp(argv[1],VERBOSE_FLAG)){
@@ -196,7 +199,11 @@ bool unique_state(state solution_space[MAX_SEARCH_SPACE], long frontier, state c
     }
     return true;
 }
-
+// frontier variable tracks the index after the last state on the list
+// index is the current state being cconsidered
+// This function is called in main until index == frontier.
+// At this point, the whole solution space has been explored and there 
+// are no new states
 void next_gen(state solution_space[MAX_SEARCH_SPACE], long* frontier, long* index, 
               int size, state* state_holder, bool verbose, long* solution_counter){
     cpy_state(solution_space[*index], state_holder, size);
@@ -410,9 +417,9 @@ void test(){
 
 
     state comparison_state_two = {.queens = 2,
-                              .board = {{"QXX"},
-                                        {"XXQ"},
-                                        {"XXX"}}
+                                  .board = {{"QXX"},
+                                            {"XXQ"},
+                                            {"XXX"}}
     };
     assert(state_cmp(comparison_state_two, test_next_gen_space[first_frontier],test_size));
 
