@@ -12,11 +12,11 @@ int main(int argc, char* argv[]){
          exit(EXIT_FAILURE);
     }
     
-    long frontier = 1, index = 0, solution_counter = 0;
+    long frontier = 1, f = 0, solution_counter = 0;
     state state_holder = init_state(size);
     solution_space[0] = state_holder;
-    while(index<frontier){
-        next_gen(solution_space,&frontier, &index, size, 
+    while(f<frontier){
+        next_gen(solution_space,&frontier, &f, size, 
                  &state_holder, verbose, &solution_counter);
     }
     printf("%li solutions\n", solution_counter);
@@ -386,7 +386,7 @@ void test(){
 
     // Initialise a new solution space, except this one will only have 1 black board at the start
     // (just like the real code will do)
-    state* test_next_gen_space = (state*)malloc(sizeof(state)*TEST_SEARCH_SPACE);
+    state* test_next_gen_space = (state*)malloc(sizeof(state)*MAX_SEARCH_SPACE);
     
     long test_frontier = 1, test_index = 0, test_solution_counter = 0;
     int test_size = 3;

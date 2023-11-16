@@ -1,0 +1,42 @@
+New Features:
+1) Recursive Back Tracking Search Method
+	This method is much, much faster at exploring the possible solution space. 
+	It can go up to 15x15 (Where it generates roughly 2.3 million solutions in just under 20 seconds on my machine). 
+	This is significant improvement over the breadth first method in the basic assignment which became infeasible at 8x8 grids. 
+	This method is also capable of generating the 14.8 million solutions of a 16x16 space however, this will take roughly 20 minutes. 
+	For this reason, the new upper limit on board size is now 15. 
+
+2) Adjustable Solution Storage Space
+	The original method uses a fixed length array which simply needed to be set to a significant upper limit so it never filled up. 
+	This is a very inefficient method of storage as it leads to either alot of unused space or a Stack Overflow error. 
+	For this extension I created a data structure based on a Stack, where new solutions are added on top of each other, 
+	with each solution pointing to the previous and at the bottom is a NULL pointer, which serves as an anchor to the structure so 
+	when looping through the stack, the program knows where the end is. The new structure allows not only as many solutions 
+	to be stores as is necessary, but also it uses the precise amount of memory that is required to store the series of 
+	structures within the Stack with no wastage.
+
+3) Fundamental Solution Identification
+	As this requires generating all the geometric permutations of each solution, this is a much more resource heavy procedure 
+	than normal solution identification. Read more here on what fundamental solutions are: https://en.wikipedia.org/wiki/Eight_queens_puzzle 
+	If the -fundamental flag is active, this script will examine the solution space stack and add the fundamental solutions to a separate 
+	stack and return this to the user. If the -verbose flag is also active, it will show the position of the queens within these fundamental 
+	solutions as well. The cut off point for this operation (the largest it can do without becoming computationally infeasible) is 11x11, 
+	where it computes the 341 fundamental solutions in just under 4 seconds on my machine. To ensure the user doesn't unknowingly trigger a 
+	very long process, there is a warning that comes up if users request the fundamental solutions of any grid larger than 11x11, which they 
+	can chose to ignore if they want. 
+
+Usage
+COMPILE: 
+make extension
+
+RUN
+./extension [N] - Computes the number of solutions for an NxN board.
+./extension -verbose [N] - Computes the number of solutions for an NxN board and shows their layout
+./extension -fundamental [N] - Computes the number of solutions and fundamental solutions for an NxN board.
+./extension -fundamental -verbose [N] - Computes the number of solutions and fundamental solutions for an NxN board and shows all layouts.
+
+If you execute via the Makefile:
+make extrun
+
+this will run:
+./extension -fundamental -verbose 10

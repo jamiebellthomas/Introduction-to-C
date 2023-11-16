@@ -188,9 +188,9 @@ bool user_continue(){
     char cont;
     printf("Finding fundamental solutions for grids larger than 11x11 is very computationally expensive\n");
     printf("Do you wish to proceed? (y/n)\n");
-    scanf("%c", &cont);
+    int inp = scanf("%c", &cont);
         
-    if(cont==CONTINUE){
+    if(inp == 1 && cont==CONTINUE){
         printf("This may take a while...\n");
         return true;
     }
