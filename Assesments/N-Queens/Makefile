@@ -8,7 +8,7 @@ OPTIM := $(GENFLAGS) -O3
 SANITIZE := $(GENFLAGS) -g3 -fsanitize=address -fsanitize=undefined
 
 # In the labs you'll probably use clang, but make sure to try gcc too
-CC := gcc
+CC := clang
 
 8q: 8q.c 8q.h
 	$(CC) 8q.c $(OPTIM) -o 8q
@@ -16,13 +16,11 @@ CC := gcc
 8q_san: 8q.c 8q.h
 	$(CC) 8q.c $(SANITIZE) -o 8q_san
 
-all: 8q 8q_san
-
 run:
-	./8q_san 5
+	./8q -verbose 6
 
 clean:
-	rm -f 8q 8q_san 8q.zip
+	rm -f 8q 8q_san 8q.zip extension extension_san
 
 extension: extension.c
 	$(CC) extension.c $(OPTIM) -o extension

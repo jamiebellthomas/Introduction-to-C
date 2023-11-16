@@ -15,6 +15,8 @@
 #define ROTATIONS 4
 #define FUNDAMENTAL_JUMP 11
 #define CONTINUE 'y'
+#define ARG_LOWER 2
+#define ARG_UPPER 4
 
 
 struct state {
@@ -113,12 +115,13 @@ USER INPUT
 void user_input(int argc, char* argv[], int* N, bool* verbose, bool* fundamental){
 
     
-    if(argc < 2 || argc > 4){
+    if(argc < ARG_LOWER || argc > ARG_UPPER){
         fprintf(stderr, "Program expects 1 to 3 arguments but recieved %i\n", (argc-1));
         fprintf(stderr, "Correct usage:\n./8q N\n./8q -verbose [N]\n./8q -fundamental [N]\n./8q -verbose -fundamental [N]\n");
         exit(EXIT_FAILURE);
     }
     if(argc==2){
+        // If argc = 2, only flag should be board size
         if(valid_number(argv[1])){
             *N = atoi(argv[1]);
             return;
@@ -128,6 +131,7 @@ void user_input(int argc, char* argv[], int* N, bool* verbose, bool* fundamental
     }
 
     if(argc == 3){
+        // If argc = 3, first flag if -verbose of -fundamental, second is board size
         if(!valid_number(argv[2])){
             fprintf(stderr, "Numerical argument must be an integer between 1 and %i.\n", MAX_GRID);
             exit(EXIT_FAILURE);
@@ -159,6 +163,8 @@ void user_input(int argc, char* argv[], int* N, bool* verbose, bool* fundamental
 }
 
     else{
+        // Final option is 4 arguments, this means first two are -verbose/-fundamental and last 
+        // one is board size.
         if(!valid_number(argv[3])){
             fprintf(stderr, "Numerical argument must be an integer between 1 and %i.\n", MAX_GRID);
             exit(EXIT_FAILURE);
@@ -529,8 +535,7 @@ TESTING
 void test(){
     //Only functions unique to extension.c will be tested 
 
-
-
+    // Ensure new user input function can read in -fundamental flag
     int test_N = 0, test_argc;
     bool test_verbose = false, test_fundamental = false;
     char* test_args[] = {"program","-verbose","-fundamental","8"};
@@ -599,7 +604,7 @@ void test(){
     // free_list() was tested using the sanatizer, no memory leaks were identified therefore this function
     // must be freeing the stacks in their entirety. 
 
-    // verbose_output_loop() prints to screen, therefore this was tested via inspection. 
+    // verbose_output_loop() prints to screen, therefore this was tested via command line and inspection. 
 
     // user_continue() direcrtly leads to program termination, so this was tested via command line. 
 

@@ -110,15 +110,6 @@ void cpy_state(state old_state, state* new_state, int size){
     }
 }
 
-void print_board(state* position, int size){
-    for(int row = 0;row<size;row++){
-        for(int col = 0;col<size;col++){
-            printf("%c",position->board[row][col]);
-        }
-        printf("\n");
-    }
-}
-
 
 /*
 ---------------
@@ -299,7 +290,6 @@ void test(){
     test_state.board[1][1] = 'E';
     test_state.board[2][2] = 'S';
     test_state.board[3][3] = 'T';
-    //print_board(&test_state,test_N);
 
     
     state test_state_cpy = init_state(test_N);
@@ -360,7 +350,6 @@ void test(){
     // ensure this returns an identical result
     test_state_cpy.board[1][0] = 'T';
     queen_adder(&test_state_cpy,test_row,test_col,test_N);
-    //print_board(&test_state_cpy,test_N);
     assert(state_cmp(comparison_state, test_state_cpy, test_N));
 
 
