@@ -22,7 +22,7 @@ typedef struct state state;
 
 void user_input(int argc, char* argv[], int* N, bool* verbose);
 bool valid_number(char val[]);
-void test();
+void test(void);
 state init_state(int size);
 bool state_cmp(state state_one, state state_two, int size);
 void cpy_state(state old_state, state* new_state, int size);

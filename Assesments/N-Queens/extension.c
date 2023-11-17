@@ -36,7 +36,7 @@ typedef struct solution solution;
 // Prototypes:
 
 void user_input(int argc, char* argv[], int* N, bool* verbose, bool* fundamental);
-bool user_continue();
+bool user_continue(void);
 bool valid_number(char val[]);
 state init_state(int size);
 void row_explore(state* position, int row_index, int size);
@@ -56,7 +56,7 @@ bool state_cmp(state state_one, state state_two, int size);
 solution* fundamental_finder(solution* solution_space, solution* fundamenal_solution_space, 
                        int* fundamenal_solution_counter, int size);
 bool geometric_comparison(state* solution, state* position, int size);
-void test();
+void test(void);
 
 
 int main(int argc, char* argv[]){
@@ -190,7 +190,7 @@ void user_input(int argc, char* argv[], int* N, bool* verbose, bool* fundamental
 }
 
 // This is a new simple user input function to collect a yes no response from the user. 
-bool user_continue(){
+bool user_continue(void){
     char cont;
     printf("Finding fundamental solutions for grids larger than 11x11 is very computationally expensive\n");
     printf("Do you wish to proceed? (y/n)\n");
@@ -532,7 +532,7 @@ TESTING
 */
 
 
-void test(){
+void test(void){
     //Only functions unique to extension.c will be tested 
 
     // Ensure new user input function can read in -fundamental flag
@@ -544,7 +544,9 @@ void test(){
     assert(test_verbose);
     assert(test_fundamental);
 
-    
+    // Major addition is the new data structres, need to test that
+    // add solution adds solution structs to the stack, this is done
+    // using solution_counter
     solution* latest_solution = NULL;
     int test_size = 8;
     state test_state = init_state(test_size);

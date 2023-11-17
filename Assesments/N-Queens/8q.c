@@ -247,7 +247,7 @@ void verbose_output(state position, int size){
 TESTING
 -------
 */
-void test(){
+void test(void){
 
     // First checks are making sure valid_number only allows
     // numerical values from 1-10.
@@ -354,7 +354,7 @@ void test(){
 
 
     // Initialise a dummy solution space with slightly varying boards within it
-    state* test_solution_space = (state*)malloc(sizeof(state)*TEST_SEARCH_SPACE);
+    state* test_solution_space = (state*)malloc(sizeof(state)*MAX_SEARCH_SPACE);
     for(int i = 1;i<TEST_SEARCH_SPACE;i++){
         test_solution_space[i] = init_state(test_N);
         test_solution_space[i].board[0][0] = (i-1)+'A';
