@@ -11,7 +11,7 @@
 #define QUEEN_UNCOVERED 'O'
 #define SINGLE_DIGIT_LIMIT 9
 #define MIN_GRID 1
-#define MAX_GRID 15
+#define MAX_GRID 20
 #define ROTATIONS 4
 #define FUNDAMENTAL_JUMP 11
 #define CONTINUE 'y'

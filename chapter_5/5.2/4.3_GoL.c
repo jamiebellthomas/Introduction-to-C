@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
-#define WIDTH 15
-#define HEIGHT 15
+#define WIDTH 80
+#define HEIGHT 80
 #define BASE_TEN 10
 #include "neillsimplescreen.h"
 
@@ -154,6 +154,8 @@ void array_transfer(int** array_current, int** array_next){
 
 void gol_iterator(int** array_current, int** array_next, int iterations){
     for(int i = 0;i<iterations;i++){
+        printf("Iteration: %i\n",(i+1));
+        printf("--------------------\n");
         print_2D_array(array_current);
         printf("--------------------\n");
         for(int row = 0;row<HEIGHT;row++){

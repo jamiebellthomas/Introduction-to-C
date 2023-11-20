@@ -35,6 +35,8 @@ void anagram_finder(char* a, int l, int r, char** db, char* original){
             swap((a + l), (a + i)); // backtrack 
         } 
     } 
+    // Recursion may not have been the best way to do this. Its very computationally expensive
+    // Maybe a histogram would've been the way to go and then strcmp(). Any word over 6 letters takes too long to process. 
 } 
   
 void word_checker(char** db, const char* str, char* original){
@@ -70,8 +72,7 @@ void user_input(char* inp){
 
 
 
-int main(void) 
-{ 
+int main(void) { 
     FILE *fp;
     size_t row_counter;
     char inp[COLS];
