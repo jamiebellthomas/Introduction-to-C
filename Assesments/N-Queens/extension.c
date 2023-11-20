@@ -322,7 +322,7 @@ void recursion(solution** latest_solution, int* solution_count,
                state state_holder, int col, int size){
     
     if(state_holder.queens == size){
-        *latest_solution = add_solution(*latest_solution, state_holder); 
+        // *latest_solution = add_solution(*latest_solution, state_holder);
         (*solution_count)++;
         return;
     }
