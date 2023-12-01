@@ -23,13 +23,25 @@ bsa* bsa_init(void){
     return init_bsa;
 }
 
+bool bsa_free(bsa* b){
+    for(int i = 0;i<BSA_ROWS;i++){
+        if(b->row_array[i].row != NULL){
+            free(b->row_array[i].row);
+        }
+    }
+
+    free(b->row_array);
+    free(b);
+}
+
+
 int pointer_idx(int idx){
     // This will take a given index and determine what row of the BSA it sits in
     int val = idx+1, row_idx = 0, range = 1;
 
     while(range<=val){
         row_idx++;
-        range*=2;
+        range = range << 1;
     }
 
     // This loop intentially runs until it's overshot.
@@ -46,6 +58,15 @@ int pointer_idx(int idx){
 }
 
 void test(void){
+
+    bsa* test_bsa = bsa_init();
+
+    for(int i = 0;i<BSA_ROWS;i++){
+        assert(test_bsa->row_array[i].row == NULL);
+        assert(test_bsa->row_array[i].value_count == 0);
+    }
+
+
     assert(pointer_idx(0) == 0);
     assert(pointer_idx(1) == 1);
     assert(pointer_idx(2) == 1);
@@ -55,10 +76,5 @@ void test(void){
     assert(pointer_idx(8) == 3);
     assert(pointer_idx(25) == 4);
 
-    bsa* test_bsa = bsa_init();
-
-    for(int i = 0;i<BSA_ROWS;i++){
-        assert(test_bsa->row_array[i].row == NULL);
-        assert(test_bsa->row_array[i].value_count == 0);
-    }
+    
 }

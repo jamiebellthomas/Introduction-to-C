@@ -1,4 +1,6 @@
 #include "../bsa.h"
+#define UNUSED_CELL -1
+
 
 // Prototypes
 int pointer_idx(int idx);
