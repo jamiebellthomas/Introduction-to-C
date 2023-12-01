@@ -1,4 +1,8 @@
-#include "bsa.h"
+#include "../bsa.h"
+
+
+int pointer_idx(int idx);
+
 
 struct bsa{
     int max_index;
