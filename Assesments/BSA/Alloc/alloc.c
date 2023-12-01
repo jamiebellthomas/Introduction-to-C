@@ -11,12 +11,13 @@ bsa* bsa_init(void){
     } 
 
 
-    init_bsa->length=0;
+    init_bsa->value_count=0;
     init_bsa->max_index=-1;
-    init_bsa->pointer_array=(int**)malloc(BSA_ROWS*sizeof(int*));
+    init_bsa->row_array=(bsa_row*)malloc(BSA_ROWS*sizeof(bsa_row));
 
     for(int i = 0;i<BSA_ROWS;i++){
-        init_bsa->pointer_array[i] = NULL;
+        init_bsa->row_array[i].row = NULL;
+        init_bsa->row_array[i].value_count = 0;
     }
 
     return init_bsa;
@@ -53,4 +54,11 @@ void test(void){
     assert(pointer_idx(7) == 3);
     assert(pointer_idx(8) == 3);
     assert(pointer_idx(25) == 4);
+
+    bsa* test_bsa = bsa_init();
+
+    for(int i = 0;i<BSA_ROWS;i++){
+        assert(test_bsa->row_array[i].row == NULL);
+        assert(test_bsa->row_array[i].value_count == 0);
+    }
 }
