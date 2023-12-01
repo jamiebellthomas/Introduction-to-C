@@ -2,6 +2,7 @@
 
 int subseq(const char s1[], const char s2[]){
     int longest = 0, len1 = strlen(s1), len2 = strlen(s2);
+    printf("%i %i\n",len1,len2);
     for(int i = 0; i<len1;i++){
         for(int j = 0;j<len2;j++){
             if(s1[i] == s2[j]){
