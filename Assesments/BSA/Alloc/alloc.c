@@ -16,8 +16,9 @@ bsa* bsa_init(void){
 
 
     init_bsa->value_count=0;
-    init_bsa->max_index=-1;
+    init_bsa->max_index=UNUSED;
     init_bsa->row_array=(bsa_row*)malloc(BSA_ROWS*sizeof(bsa_row));
+
 
     if(init_bsa->row_array == NULL){
         fprintf(stderr, "Memory allocation failed.\n");
@@ -58,8 +59,9 @@ SET VALUES
 */
 bool bsa_set(bsa* b, int indx, int d){
 
-    if(d == UNUSED_CELL){
-        // Here we call remove function. 
+    if(d == UNUSED){
+        bsa_delete(b, indx);
+        return true;
     }
 
     int row_idx = pointer_index(indx);
@@ -70,6 +72,9 @@ bool bsa_set(bsa* b, int indx, int d){
 
     if(b->row_array[row_idx].row == NULL){
         b->row_array[row_idx].row = (int*)calloc((1 << row_idx),sizeof(int));
+        for(int i = 0; i <= ((1 << row_idx)-1); i++){
+            b->row_array[row_idx].row[i] = UNUSED;
+        }
         if(b->row_array[row_idx].row == NULL){
             fprintf(stderr, "Memory allocation failed.\n");
             bsa_free(b);
@@ -79,7 +84,7 @@ bool bsa_set(bsa* b, int indx, int d){
 
     int col_idx = col_index(indx);
 
-    if(b->row_array[row_idx].row[col_idx] == UNUSED_CELL){
+    if(b->row_array[row_idx].row[col_idx] == UNUSED){
         (b->row_array[row_idx].value_count)++;
         (b->value_count)++;
     }
@@ -104,7 +109,7 @@ MAX INDEX
 int bsa_maxindex(bsa* b){
 
     if(b == NULL){
-        return -1;
+        return UNUSED;
     }
     return b->max_index;
 }
@@ -143,24 +148,29 @@ bool bsa_delete(bsa* b, int indx){
     }
     // At this point we know the cell is in use.
     // Set value to zero and decrement values in row.
-    b->row_array[row_idx].row[col_idx] = UNUSED_CELL;
+    b->row_array[row_idx].row[col_idx] = UNUSED;
     (b->row_array[row_idx].value_count)--;
 
     // If the row is now empty, free the memory.
+    // Reset pointer to NULL. (Marked for reallocation)
     if(b->row_array[row_idx].value_count == 0){
         free(b->row_array[row_idx].row);
         b->row_array[row_idx].row = NULL;
     }
     // Decrement values in array, if there is nothing in the array
-    // reset max index to -1 and return
+    // reset max index to -1 (UNUSED) and return
     (b->value_count)--;
     if(b->value_count == 0){
-        b->max_index = -1;
+        b->max_index = UNUSED;
         return true;
     }
 
     // If there are still values in the array we need to
     // determine the new max_index
+    // go back 1-by-1 until we find the next value
+    
+    // If the array was empty max index would've already been set to 1
+    // so 
 
     do{
 
@@ -212,7 +222,7 @@ int col_index(int idx){
 bool used_cell(bsa* b, int row_idx, int col_idx){
 
     if(b->row_array[row_idx].value_count == 0 || 
-       b->row_array[row_idx].row[col_idx] == UNUSED_CELL ||
+       b->row_array[row_idx].row[col_idx] == UNUSED ||
        row_idx >= BSA_ROWS){
         return false;
     }
@@ -283,18 +293,20 @@ void test(void){
 
    bsa_delete(test_bsa, 0);
    assert(bsa_get(test_bsa, 15) == NULL);
-   assert(test_bsa->max_index == -1);
+   assert(test_bsa->max_index ==UNUSED);
    assert(test_bsa->value_count == 0);
    assert(test_bsa->row_array[0].value_count == 0);
    assert(test_bsa->row_array[0].row == NULL);
 
+    // Test that setting the last active cell to unused sets max_index
+    // to -1 (UNUSED)
+    bsa_set(test_bsa, 0, 1);
+    assert(test_bsa->max_index == 0);
+    bsa_set(test_bsa, 0, UNUSED);
 
 
-   
 
-   
-
-
+    assert(test_bsa->max_index ==UNUSED);
     // Running this with a sanitizer proves it has
     // freed up all memory.
     bsa_free(test_bsa);

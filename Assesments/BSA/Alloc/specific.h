@@ -1,5 +1,5 @@
 #include "../bsa.h"
-#define UNUSED_CELL 0
+#define UNUSED -1
 
 
 // Prototypes
