@@ -1,9 +1,11 @@
 #include "../bsa.h"
-#define UNUSED_CELL -1
+#define UNUSED_CELL 0
 
 
 // Prototypes
-int pointer_idx(int idx);
+int pointer_index(int idx);
+int col_index(int idx);
+bool used_cell(bsa* b, int row_idx, int col_idx);
 
 
 

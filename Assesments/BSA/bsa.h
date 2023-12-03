@@ -11,22 +11,31 @@
 typedef struct bsa bsa;
 
 // Create an empty BSA
+
+//DONE & TESTED
 bsa* bsa_init(void);
 
 // Set element at index indx with value d i.e. b[i] = d;
 // May require an allocation if it's the first element in that row
+
+//DONE & TESTED
 bool bsa_set(bsa* b, int indx, int d);
 
 // Return pointer to data at element b[i]
 // or NULL if element is unset, or part of a row that hasn't been allocated.
+
+//DONE & TESTED
 int* bsa_get(bsa* b, int indx);
 
 // Delete element at index indx - forces a shrink
 // if that was the only cell in the row occupied.
+//DONE & TESTED
 bool bsa_delete(bsa* b, int indx);
 
 // Returns maximum index written to so far or
 // -1 if no cells have been written to yet
+
+//DONE & TESTED
 int bsa_maxindex(bsa* b);
 
 // Returns stringified version of structure
@@ -35,6 +44,8 @@ int bsa_maxindex(bsa* b);
 bool bsa_tostring(bsa* b, char* str);
 
 // Clears up all space used
+
+//DONE & TESTED
 bool bsa_free(bsa* b);
 
 // Allow a user-defined function to be applied to each (valid) value 
