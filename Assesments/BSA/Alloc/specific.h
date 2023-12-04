@@ -1,5 +1,6 @@
 #include "../bsa.h"
 #define UNUSED -1
+#define MAX_STRING 1000
 
 
 // Prototypes

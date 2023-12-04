@@ -10,11 +10,11 @@ int main(void)
 
    test();
    
-   //char str[LISTSTRLEN] = "";
+   char str[LISTSTRLEN] = "";
    
    // A NULL BSA has size zero
    assert(bsa_maxindex(NULL)==-1);
-   //assert(!bsa_tostring(NULL, str));
+   assert(!bsa_tostring(NULL, str));
 
    // Initialise
    bsa* b = bsa_init();
@@ -27,14 +27,15 @@ int main(void)
    // Reset existing value
    assert(bsa_set(b, 0, 0));
    assert(bsa_set(b, 15, 15));
+   assert(bsa_maxindex(b)==15);
 
 
-   /*
+
 
    // tostring
    assert(bsa_tostring(b, str));
    assert(strcmp(str, "{[0]=0}{}{}{}{[15]=15}")==0);
-   */
+
    // Get some values tbsa've already been set
    int* p = bsa_get(b, 0);
    assert(p);
@@ -61,11 +62,10 @@ int main(void)
    p = bsa_get(b, 15);
    assert(p);
    assert(*p == 15);
-   /*
-   
+
    assert(bsa_tostring(b, str));
    assert(strcmp(str, "{[0]=0}{}{}{}{[15]=15}{}{[100]=100}")==0);
-   */
+
    
    // Let's do some deleting
 
@@ -76,18 +76,18 @@ int main(void)
    assert(bsa_maxindex(b)==15);
    
    // Check it's gone
-   //assert(bsa_tostring(b, str));
-   //assert(strcmp(str, "{[0]=0}{}{}{}{[15]=15}")==0);
+   assert(bsa_tostring(b, str));
+   assert(strcmp(str, "{[0]=0}{}{}{}{[15]=15}")==0);
    // Cell is used, can delete it
    assert(bsa_delete(b, 15));
    assert(bsa_maxindex(b)==0);
-   //assert(bsa_tostring(b, str));
-   //assert(strcmp(str, "{[0]=0}")==0);
+   assert(bsa_tostring(b, str));
+   assert(strcmp(str, "{[0]=0}")==0);
    // Delete last element left
    assert(bsa_delete(b, 0));
    assert(bsa_maxindex(b)<0);
-   //assert(bsa_tostring(b, str));
-   //assert(strcmp(str, "")==0);
+   assert(bsa_tostring(b, str));
+   assert(strcmp(str, "")==0);
   
    bsa_free(b);
    /*

@@ -187,10 +187,49 @@ bool bsa_delete(bsa* b, int indx){
     return true;
 
 }
+/*
+-------------
+BSA to string
+-------------
+*/
+// Returns stringified version of structure
+// Each row has its elements printed between {}, up to the maximum index.
+// Rows after the maximum index are ignored.
+bool bsa_tostring(bsa* b, char* str){
+
+    if(b == NULL){
+        return false;
+    }
+
+    str[0] = '\0';
+    int max_row = pointer_index(b->max_index), global_index, added;
+
+    for(int i = 0; i <= max_row; i++){
+        strcat(str, "{");
+
+        for(int j = 0; j <= ((1 << i)-1); j++){
+            added = 0;
+            if(used_cell(b, i, j)){
+                global_index = ((1 << i)-1) + j;
+                // Add a little conditional that adds a space
+                // if there is more than one entry in a row
+                if(added != 0){
+                    strcat(str, " ");
+                }
+                snprintf((str + strlen(str)), (MAX_STRING - strlen(str)), "[%i]=%i", global_index, b->row_array[i].row[j]);
+                added++;
+            }
+        }
+        strcat(str, "}");
+
+
+    }
+    return true;
+}
 
 /*
 ---------------------
-ROW & COL INDEX CALCS
+ADDITIONAL FUNCTIONS
 ---------------------
 */
 
