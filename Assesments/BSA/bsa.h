@@ -41,6 +41,8 @@ int bsa_maxindex(bsa* b);
 // Returns stringified version of structure
 // Each row has its elements printed between {}, up to the maximum index.
 // Rows after the maximum index are ignored.
+
+//DONE & TESTED
 bool bsa_tostring(bsa* b, char* str);
 
 // Clears up all space used

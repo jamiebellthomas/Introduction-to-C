@@ -90,7 +90,7 @@ int main(void)
    assert(strcmp(str, "")==0);
   
    bsa_free(b);
-   /*
+
    // foreach - use it to compute product of numbers, and also to double each one
    b = bsa_init();
    bsa_set(b, 1, 1);
@@ -107,7 +107,7 @@ int main(void)
    assert(strcmp(str, "{}{[1]=2 [2]=4}{[3]=6}")==0);
    
    bsa_free(b);
-   */
+
 
    return 0;
 }

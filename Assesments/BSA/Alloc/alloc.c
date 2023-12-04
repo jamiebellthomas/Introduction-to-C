@@ -147,7 +147,7 @@ bool bsa_delete(bsa* b, int indx){
         return false;
     }
     // At this point we know the cell is in use.
-    // Set value to zero and local values count.
+    // Set value to unused and decrement local values count.
     b->row_array[row_idx].row[col_idx] = UNUSED;
     (b->row_array[row_idx].value_count)--;
 
@@ -189,7 +189,7 @@ bool bsa_delete(bsa* b, int indx){
 }
 /*
 -------------
-BSA to string
+BSA TO STRING
 -------------
 */
 // Returns stringified version of structure
@@ -203,12 +203,14 @@ bool bsa_tostring(bsa* b, char* str){
 
     str[0] = '\0';
     int max_row = pointer_index(b->max_index), global_index, added;
-
+    // max_row tells us how many sets of curly braces we'll need,
+    // so this'll be the range of our loop
     for(int i = 0; i <= max_row; i++){
         strcat(str, "{");
-
+        added = 0;
+        // Next loop is the range of indicies in a given row
         for(int j = 0; j <= ((1 << i)-1); j++){
-            added = 0;
+            // If the cell is in use, append it to the string
             if(used_cell(b, i, j)){
                 global_index = ((1 << i)-1) + j;
                 // Add a little conditional that adds a space
@@ -216,15 +218,36 @@ bool bsa_tostring(bsa* b, char* str){
                 if(added != 0){
                     strcat(str, " ");
                 }
-                snprintf((str + strlen(str)), (MAX_STRING - strlen(str)), "[%i]=%i", global_index, b->row_array[i].row[j]);
+                snprintf((str + strlen(str)), (MAX_STRING - strlen(str)), 
+                          "[%i]=%i", global_index, b->row_array[i].row[j]);
                 added++;
             }
         }
         strcat(str, "}");
-
-
     }
     return true;
+}
+
+/*
+--------
+FOR EACH
+--------
+*/
+
+
+void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc){
+
+    if(b == NULL){
+        return;
+    }
+    int* val;
+    for(int i = 0; i <= b->max_index; i++){
+        val = bsa_get(b, i);
+        if(val){
+            func(val, acc);
+        }
+            
+    }
 }
 
 /*
@@ -247,6 +270,7 @@ int pointer_index(int idx){
     // Therefore we need to backtrack 1 row
     row_idx-=1;
 
+    // If idx = -1 (unused), returned value is -1, also unused
     return row_idx;
 
 }
