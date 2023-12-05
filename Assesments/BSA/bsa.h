@@ -53,6 +53,8 @@ bool bsa_free(bsa* b);
 // Allow a user-defined function to be applied to each (valid) value 
 // in the array. The user defined 'func' is passed a pointer to an int,
 // and maintains an accumulator of the result where required.
+
+//DONE & TESTED
 void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc);
 
 // You'll this to test the other functions you write
