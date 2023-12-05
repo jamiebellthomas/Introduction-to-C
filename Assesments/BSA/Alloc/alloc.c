@@ -14,11 +14,9 @@ bsa* bsa_init(void){
         exit(EXIT_FAILURE);
     } 
 
-
     init_bsa->value_count=0;
-    init_bsa->max_index=-1;
+    init_bsa->max_index=UNUSED;
     init_bsa->row_array=(bsa_row*)malloc(BSA_ROWS*sizeof(bsa_row));
-
 
     if(!(init_bsa->row_array)){
         fprintf(stderr, "Memory allocation failed.\n");
@@ -87,7 +85,7 @@ MAX INDEX
 int bsa_maxindex(bsa* b){
 
     if(!b){
-        return -1;
+        return UNUSED;
     }
     return b->max_index;
 }
@@ -281,7 +279,7 @@ bool bsa_remove(bsa* b, int row_idx, int col_idx){
     // the array reset max index to -1 (UNUSED) and return
     (b->value_count)--;
     if(b->value_count == 0){
-        b->max_index = -1;
+        b->max_index = UNUSED;
         // reutrn true if BSA is now empty.
         return true;
     }
@@ -375,7 +373,7 @@ void test(void){
     bsa_remove(test_bsa, 1, 0);
     assert(test_bsa->row_array[1].row[0].set == false);
     bsa_remove(test_bsa, 1, 1);
-    assert(test_bsa->max_index == -1);
+    assert(test_bsa->max_index == UNUSED);
 
     // Set some values
     assert(bsa_set(test_bsa, 0, 4));
@@ -422,7 +420,7 @@ void test(void){
     bsa_delete(test_bsa, 0);
     // Now we need to make sure max index is reset to unused.
     assert(!(bsa_get(test_bsa, 15)));
-    assert(test_bsa->max_index == -1);
+    assert(test_bsa->max_index == UNUSED);
     assert(test_bsa->value_count == 0);
     assert(test_bsa->row_array[0].value_count == 0);
     assert(!(test_bsa->row_array[0].row));
