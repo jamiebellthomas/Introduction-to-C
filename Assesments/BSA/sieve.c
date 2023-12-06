@@ -1,7 +1,6 @@
 #include "bsa.h"
 
 #define MAX 271
-#define MAX_STR 2000
 
 void print(int* p, int* n);
 int next_factor(bsa* b, int p);
@@ -24,7 +23,6 @@ int main(void)
       }
    }
    bsa_foreach(print, b, &p);
-   char str[MAX_STR] = "";
    return 0;
    
 }
