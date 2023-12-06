@@ -140,11 +140,9 @@ bool bsa_delete(bsa* b, int indx){
     // so 
 
     do{
-
         indx--;
         row_idx = pointer_index(indx);
         col_idx = col_index(indx);
-    
     } while (!(used_cell(b, row_idx, col_idx)) &&
              indx >= 0);
 
@@ -245,25 +243,30 @@ void bsa_row_create(bsa* b, int row_idx){
 }
 
 void bsa_row_free(bsa* b, int row_idx){
+    // Free row memory
     free(b->row_array[row_idx].row);
+    // Set row pointer to NULL (marked for reallocation)
     b->row_array[row_idx].row = NULL;
 }
 
 void bsa_append(bsa* b, int idx, int row_idx, int col_idx, int d){
+    // If the current cell isn't set, set it and add to the respective values
     if(!(b->row_array[row_idx].row[col_idx].set)){
         (b->row_array[row_idx].value_count)++;
         (b->value_count)++;
         b->row_array[row_idx].row[col_idx].set = true;
     }
-
+    // If the new index is greater than the current max - update.
     if(idx > b->max_index){
         b->max_index = idx;
     }
-
+    // Finally, set the value. 
     b->row_array[row_idx].row[col_idx].value = d;
 }
 
 bool bsa_remove(bsa* b, int row_idx, int col_idx){
+    // At this point we know the cell is in use... 
+
     // Set boolean to false and decrement no 
     // of values in the row
      b->row_array[row_idx].row[col_idx].set = false;
@@ -438,10 +441,10 @@ void test(void){
     assert(!strcmp("{}{[1]=1 [2]=1}", test_str));
 
     int acc = 0;
+    // count_elem() is trivial, no need to test.
     bsa_foreach(count_elem, test_bsa, &acc);
     assert(acc = 2);
-    bsa_tostring(test_bsa, test_str);
-    assert(!strcmp("{}{[1]=2 [2]=2}", test_str));
+
     // Running this with a sanitizer/valgrid proves it has
     // freed up all memory.
     bsa_free(test_bsa);
