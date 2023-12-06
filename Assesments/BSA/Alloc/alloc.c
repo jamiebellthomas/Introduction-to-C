@@ -138,15 +138,9 @@ bool bsa_delete(bsa* b, int indx){
     
     // If the array was empty max index would've already been set to 1
     // so 
-
-    do{
-        indx--;
-        row_idx = pointer_index(indx);
-        col_idx = col_index(indx);
-    } while (!(used_cell(b, row_idx, col_idx)) &&
-             indx >= 0);
-
-    b->max_index = indx;
+    if(indx == b->max_index){
+        update_maxindex(b, indx);
+        }
 
     return true;
 
@@ -299,6 +293,21 @@ bool used_cell(bsa* b, int row_idx, int col_idx){
     return true;
 }
 
+void update_maxindex(bsa* b, int idx){
+    int row_idx = pointer_index(idx), col_idx = col_index(idx);
+
+    do{
+        idx--;
+        row_idx = pointer_index(idx);
+        col_idx = col_index(idx);
+    } while (!(used_cell(b, row_idx, col_idx)) &&
+        idx >= 0);
+
+    b->max_index = idx;
+
+
+}
+
 void row_str(bsa* b, char* str, int row){
     strcat(str, "{");
     int added = 0, global_index;
@@ -405,6 +414,14 @@ void test(void){
     assert(!(bsa_get(test_bsa, 1)));
     assert(!(bsa_get(test_bsa, 14)));
 
+    // Make sure we can find the next used index before making
+    // deletion function
+    assert(bsa_maxindex(test_bsa) == 15);
+    update_maxindex(test_bsa, test_bsa->max_index);
+    assert(bsa_maxindex(test_bsa) == 0);
+
+    test_bsa->max_index = 15;
+
     // Remove index 15 and make sure everything 
     // is in check
     bsa_delete(test_bsa, 15);
@@ -418,6 +435,10 @@ void test(void){
     assert(test_bsa->row_array[4].value_count == 0);
     // ... Therefore no memory stored here.
     assert(!(test_bsa->row_array[4].row));
+
+
+    
+
 
     // Same procedure for the remaining value
     bsa_delete(test_bsa, 0);

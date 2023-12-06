@@ -25,8 +25,6 @@ int main(void)
    }
    bsa_foreach(print, b, &p);
    char str[MAX_STR] = "";
-   bsa_tostring(b, str);
-   printf("%s\n", str);
    return 0;
    
 }

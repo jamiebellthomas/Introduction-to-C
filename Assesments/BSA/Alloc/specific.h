@@ -12,6 +12,7 @@ void bsa_append(bsa* b, int idx,
                 int row_idx, int col_idx, int d);
 bool bsa_remove(bsa* b, int row_idx, int col_idx);
 bool used_cell(bsa* b, int row_idx, int col_idx);
+void update_maxindex(bsa* b, int idx);
 void row_str(bsa* b, char* str, int row);
 
 
