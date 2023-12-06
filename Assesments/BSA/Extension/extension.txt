@@ -1,0 +1,35 @@
+Current complexities of BSA methods:
+
+bsa_init(): O(log(n))
+--
+bsa_set()
+    -> pointer_index() O(log(n))
+    -> bsa_row_create() O(n)
+    -> col_index() O(1)
+        -> pointer_index() O(log(n))
+    -> bsa_append() O(1)
+--
+bsa_get()
+    -> pointer_index() O(log(n))
+    -> col_index() O(1)
+        -> pointer_index() O(log(n))
+    -> used_cell() O(1)
+--
+bsa_delete()
+    -> pointer_index() O(log(n))
+    -> col_index() O(1)
+        -> pointer_index() O(log(n))
+    -> used_cell() O(1)
+    -> bsa_remove() O(1)
+        -> bsa_row_free() O(1)
+--
+bsa_maxindex() O(1)
+--
+bsa_free() O(log(n))
+--
+bsa_foreach() O(n)
+    -> bsa_get() O(1)
+        -> pointer_index() O(log(n))
+        -> col_index() O(1) 
+            -> pointer_index() O(log(n))
+        -> used_cell() O(1)
