@@ -3,6 +3,7 @@
 #define RESIZE_FACTOR 1.5
 #define UPPER_LOAD_FACTOR 0.75
 #define NEIGHBOURHOOD 3
+#define UNAVAILABLE -1
 
 
 struct bsa

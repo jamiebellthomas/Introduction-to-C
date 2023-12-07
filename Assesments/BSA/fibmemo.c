@@ -15,7 +15,9 @@ int main(void)
    for(int i=1; i<=MAXFIB; i++){
       printf("%d => %d\n", i, fib_memo(b, i));
    }
-
+   char str[1000];
+   bsa_tostring(b, str);
+   printf("%s", str);
    bsa_free(b);
    return 0;
 }

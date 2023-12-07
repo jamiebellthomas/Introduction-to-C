@@ -1,39 +1,97 @@
-Current complexities of BSA methods:
+My primary aim with this piece of work is to reduce the computaitonal complexity, without utilising a vast amount of unneccessary
+memory. let's start of by looking at the big O complexities of each of the functions used in the main secion of this CW. 
+
+Current complexities of my implementation of BSA methods:
 
 bsa_init(): O(log(n))
 --
-bsa_set()
+bsa_set(): Mostly O(log2(n)), unless new row is created, then O(n)
     -> pointer_index() O(log(n))
     -> bsa_row_create() O(n)
     -> col_index() O(1)
         -> pointer_index() O(log(n))
     -> bsa_append() O(1)
 --
-bsa_get()
+bsa_get(): Always O(log2(n))
     -> pointer_index() O(log(n))
     -> col_index() O(1)
         -> pointer_index() O(log(n))
     -> used_cell() O(1)
 --
-bsa_delete()
+bsa_delete(): Mostly O(log2(n)), unless largest index is removed, then O(n)
     -> pointer_index() O(log(n))
     -> col_index() O(1)
         -> pointer_index() O(log(n))
     -> used_cell() O(1)
     -> bsa_remove() O(1)
         -> bsa_row_free() O(1)
+    -> next_maxindex() O(n)
 --
-bsa_maxindex() O(1)
+bsa_maxindex(): O(1)
 --
-bsa_free() O(log(n))
+bsa_free(): O(log(n))
 --
-bsa_foreach() O(n)
+bsa_foreach():  O(n) - Always O(n) as it loops through all elements
     -> bsa_get() O(1)
         -> pointer_index() O(log(n))
         -> col_index() O(1) 
             -> pointer_index() O(log(n))
         -> used_cell() O(1)
 
+Overall, it is a somewhat efficient method. I feel there is alot of time wasted with the identification of row and column
+indicies. Since this function is called far more than any other, this should be optimised as a priority. Other functions that
+should be addressed is the allocation of memory, where the row_creation function has a complexity of O(n), and table initialisation
+has a complexity of O(log(n)). 
 
-We're going to make a hash function. Since this is simple an array of integers the hash function should be relatively simple
+Since the type of storage at hand is series of mostly unique integers, a hash table is a very appropriate method of storage,
+futhermore, hashing lends itself very nicely to reducing computational complexity. 
+
+The chosen hash function was a simple one, for a value 'x', the index was given by:
+index = x % table_length.
+
+Collisions were dealt with using a neighbourhood system, i.e, when a collision occured, the incoming value was inserted in the closest 
+cell up to +-3 cells away. If no cells are avaialble within this area, a reallocation is triggered, where the new list size is 1 higher
+
+This reallocation and rehashing should resolve all conflicts. This process is repeated until all values and the new incoming value can 
+fit into the array. 
+
+While this can potentially lead to overly-frequent reallocations and rehashing, the small nature of the data set makes this eventuality 
+unlikely. There is an additional reallocation claused added into the bsa_set() function, where if the array load factor (percentage filled)
+exceeds 0.75, the array is reallocated to a size 1.5 times bigger, so that the load factor goes down to 0.5. The upper limit of 0.75 was chosen
+as online reasearch showed that beyond this point, collision avoidance starts to significantly effect the efficiency of the algorithm. 
+
+Let's look at the complexities of the hashing technique:
+
+bsa_init(): O(1)
+--
+bsa_set(): Mostly O(1), unless a reallocation is triggered, then O(n)
+    -> neighbour_availability() O(1)
+    -> bsa_resize() O(n)
+        -> bsa_reallocate() O(n)
+    -> hash_function() O(1)
+--
+bsa_get(): O(1)
+
+--
+bsa_delete() - Mostly O(1), unless largest index is removed, then O(n) 
+    -> hash_function() O(1)
+    -> bsa_get() O(1)
+    -> next_maxindex() O(n)
+
+--
+bsa_maxindex() O(1)
+--
+bsa_free() O(1)
+--
+bsa_foreach() O(n) - Always O(n) as it loops through all elements
+    -> bsa_get() O(1)
+
+Comparing the 2 tables, the hashing method is far less computationally 
+complex. Let's see if this is reflected at runtime and if the 
+reallocation significantly detriments performance.
+
+
+
+
+
 

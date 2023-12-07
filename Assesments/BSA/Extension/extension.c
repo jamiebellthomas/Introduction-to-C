@@ -22,7 +22,7 @@ bsa* bsa_init(void){
         exit(EXIT_FAILURE);
     } 
 
-    table->max_index = -1;
+    table->max_index = UNAVAILABLE;
     table->length = INIT_SIZE;
     table->elements = 0;
 
@@ -149,15 +149,24 @@ bool bsa_set(bsa* b, int indx, int d){
     do
     {
         indx = hash_function(b->length, d);
-        printf("\n");
-        printf("Index: %i\n", indx);
+        //printf("\n");
+        //printf("Value: %i\n", d);
+        //printf("Hash Index: %i\n", indx);
         used = b->occupied[indx];
-        printf("Used: %i\n", indx);
+
+        
         if(used){
-            printf("Resizing (set)\n");
-            bsa_resize(b, b->length);
+            
+            indx = neighbour_availability(b, indx);
+            used = b->occupied[indx];
+            //printf("Used Index: %i\n", indx);
+            if(indx == UNAVAILABLE){
+                //printf("Resizing (set)\n");
+                bsa_resize(b, b->length);
+            }
+            
         }
-        printf("\n");
+        //printf("\n");
     } while(used);
 
 
@@ -189,7 +198,7 @@ MAX INDEX
 
 int bsa_maxindex(bsa* b){
     if(!b){
-        return -1;
+        return UNAVAILABLE;
     }
 
     return b->max_index;
@@ -223,7 +232,7 @@ bool bsa_delete(bsa* b, int indx){
     (b->elements)--;
     
     if(b->elements == 0){
-        b->max_index = -1;
+        b->max_index = UNAVAILABLE;
         return true;
     }
 
@@ -286,8 +295,9 @@ int neighbour_availability(bsa* b, int indx){
         }
     }
 
-    return -1;
+    return UNAVAILABLE;
 }
+
 
 
 
@@ -379,16 +389,6 @@ void test(void){
 
     assert(neighbour_availability(test_table, 1) == 2);
     
-
-
-
-
-
-
-
-
-
-
 
 
     bsa_free(test_table);
