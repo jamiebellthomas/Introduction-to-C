@@ -9,4 +9,7 @@ PRODUCTION= $(COMMON) -O3
 extension: extension.c specific.h
 	$(CC) extension.c -o extension $(PRODUCTION)
 
+extension_s: extension.c specific.h
+	$(CC) extension.c -o extension_s $(SANITIZE)
+
 

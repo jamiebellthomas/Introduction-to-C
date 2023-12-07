@@ -45,9 +45,9 @@ bool bsa_free(bsa* b){
     return true;
 }
 
-int hash_function(bsa* b, int d){
+int hash_function(int len, int d){
 
-    int hash = d%(b->length);
+    int hash = d%(len);
     return hash;
 }
 
@@ -68,7 +68,7 @@ GET
 ---
 */
 int* bsa_get(bsa* b, int indx){
-    if(!(b->occupied[indx])){
+    if((indx > b->length) || !(b->occupied[indx])){
         return NULL;
     }
 
@@ -80,7 +80,46 @@ int* bsa_get(bsa* b, int indx){
 REALLOCATE
 ----------
 */
-bool bsa_reallocate(bsa* b){
+// This changes the size of the hash table, returns true if ALL values were
+// reallocated sucessfully, and false if not.
+bool bsa_reallocate(bsa* b, int new_size){
+    // THESE NEEDS MODULARISING
+    int idx, max_idx = 0;
+    
+    
+    int* new_array = (int*)calloc(new_size, sizeof(int));
+    bool* new_occupied = (bool*)calloc(new_size, sizeof(bool));
+
+    for(int i = 0; i<b->length; i++){
+        if(bsa_get(b, i)){
+            idx = hash_function(new_size, b->array[i]);
+            // If this config doesnt work, return and pick a new size.
+            if(new_occupied[idx]){
+                free(new_array);
+                free(new_occupied);
+                return false;
+            }
+
+            if(idx > max_idx){
+                max_idx = idx;
+            }
+            new_array[idx] = b->array[i];
+            new_occupied[idx] = true;
+        }
+    }
+    free(b->array);
+    free(b->occupied);
+    b->array = new_array;
+    b->occupied = new_occupied;
+    b->max_index = max_idx;
+    b->length = new_size;
+
+    
+
+    return true;
+
+
+
 
 }
 
@@ -92,11 +131,15 @@ SET
 
 bool bsa_set(bsa* b, int indx, int d){
 
-    indx = hash_function(b, d);
+    bool available;
+
+    indx = hash_function(b->length, d);
 
     if(b->occupied[indx]){
-        assert(1);
+        bsa_reallocate(b, ((b->length)+1));
     }
+
+    return true;
 
 
 }
@@ -104,7 +147,7 @@ bool bsa_set(bsa* b, int indx, int d){
 
 void test(void){
 
-    bsa* test_table  = table_init();
+    bsa* test_table  = bsa_init();
     for(int i = 0; i<INIT_SIZE; i++){
         assert(!(test_table->array[i]));
         assert(!(test_table->occupied[i]));
@@ -113,11 +156,47 @@ void test(void){
     assert(test_table->length == INIT_SIZE);
     assert(test_table->elements == 0);
 
-    assert(hash_function(test_table, 3000) == 0);
-    assert(hash_function(test_table, 3100) == 100);
+    assert(hash_function(INIT_SIZE, 3000) == 0);
+    assert(hash_function(INIT_SIZE, 3100) == 100);
+
+    test_table->array[1] = 1;
+    test_table->occupied[1] = true;
+    assert(bsa_get(test_table, 1));
+    assert(*(bsa_get(test_table, 1)) == 1);
+    assert(!(bsa_get(test_table, 0)));
 
 
-    table_free(test_table);
+    // Make table bigger
+    bsa_reallocate(test_table, INIT_SIZE*2);
+    assert(bsa_get(test_table, 1));
+    assert(*(bsa_get(test_table, 1)) == 1);
+    assert(!(bsa_get(test_table, 0)));
+    assert(test_table->length == INIT_SIZE*2);
+    test_table->array[1500] = 1500;
+    test_table->occupied[1500] = true;
+    assert(bsa_get(test_table, 1500));
+    assert(*(bsa_get(test_table, 1500)) == 1500);
+    assert(!(bsa_get(test_table, 1499)));
+
+    // Make table smaller (original size)
+    bsa_reallocate(test_table, INIT_SIZE);
+    assert(bsa_get(test_table, 1));
+    assert(*(bsa_get(test_table, 1)) == 1);
+    assert(!(bsa_get(test_table, 0)));
+    assert(test_table->length == INIT_SIZE);
+    //value 1500 should now be in cell 500...?
+    assert(bsa_get(test_table, 500));
+    assert(*(bsa_get(test_table, 500)) == 1500);
+    assert(!(bsa_get(test_table, 499)));
+    // Check out-of-bounds index
+    assert(!(bsa_get(test_table, (INIT_SIZE+1))));
+
+
+
+
+
+
+    bsa_free(test_table);
 }
 
 

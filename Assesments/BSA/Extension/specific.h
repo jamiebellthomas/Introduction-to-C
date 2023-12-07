@@ -12,7 +12,7 @@ struct bsa
     int elements;
 };
 
-int hash_function(bsa* h, int d);
+int hash_function(int len, int d);
 void test(void);
 
 
