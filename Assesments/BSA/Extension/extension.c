@@ -122,6 +122,18 @@ bool bsa_reallocate(bsa* b, int new_size){
 
 
 }
+// This function will use bsa_reallocate to find the closest
+// feasible size above a given size (new_size)
+void bsa_resize(bsa* b, int new_size){
+    bool feasible = false;
+
+    do
+    {
+        new_size++;
+        feasible = bsa_reallocate(b, new_size);
+    } while (!feasible);
+
+}
 
 /*
 ---
@@ -131,13 +143,33 @@ SET
 
 bool bsa_set(bsa* b, int indx, int d){
 
-    bool available;
+    bool used;
+    int increment = 0;
 
-    indx = hash_function(b->length, d);
+    do
+    {
+        indx = hash_function(b->length, d);
+        used = b->occupied[indx];
+        if(used){
+            bsa_resize(b, b->length);
+        }
+    } while(used);
 
-    if(b->occupied[indx]){
-        bsa_reallocate(b, ((b->length)+1));
+
+    b->array[indx] = d;
+    b->occupied = true;
+    (b->elements)++;
+
+    if(indx>b->max_index){
+        b->max_index = indx;
     }
+
+    float load_factor = (b->elements)/b->length;
+    if(load_factor>UPPER_LOAD_FACTOR){
+        bsa_reallocate(b, (b->length)*RESIZE_FACTOR);
+    }
+
+
 
     return true;
 
