@@ -14,7 +14,7 @@ bsa* bsa_init(void){
     // We have initialised a 1D hash table with O(1), with all 
     // values set to zero (no initialising loops)
    
-    table->array = (int*)calloc(INIT_SIZE, sizeof(int));
+    table->array = (bsa_cell*)calloc(INIT_SIZE, sizeof(bsa_cell));
     table->occupied = (bool*)calloc(INIT_SIZE, sizeof(bool));
 
     if(!(table->array) || !(table->occupied)){
@@ -47,19 +47,6 @@ int hash_function(int len, int d){
     return hash;
 }
 
-/*
-We need functions to:
-init DONE + TESTED
-free DONE + TESTED
-has function DONE + TESTED
-set DONE + TESTED
-get DONE + TESTED
-delete DONE + TESTED
-maxindex DONE + TESTED
-foreach DONE + TESTED
-
-we'll also need a reallocate function, this will sit in the set function
-*/
 
 /*
 ---
@@ -67,11 +54,14 @@ GET
 ---
 */
 int* bsa_get(bsa* b, int indx){
-    if((indx >= b->length) || !(b->occupied[indx])){
+
+    int hash_index = hash_function(b->length, indx);
+
+    if(!(b->occupied[hash_index])){
         return NULL;
     }
 
-    return &(b->array[indx]);
+    return &(b->array[hash_index].value);
 }
 
 /*
@@ -83,29 +73,37 @@ REALLOCATE
 // reallocated sucessfully, and false if not.
 bool bsa_reallocate(bsa* b, int new_size){
     // THESE NEEDS MODULARISING
+    printf("Realloc function call (%i)\n", new_size);
     int idx, max_idx = 0;
     
     
-    int* new_array = (int*)calloc(new_size, sizeof(int));
+    bsa_cell* new_array = (bsa_cell*)calloc(new_size, sizeof(bsa_cell));
     bool* new_occupied = (bool*)calloc(new_size, sizeof(bool));
 
     for(int i = 0; i<b->length; i++){
         if(bsa_get(b, i)){
-            idx = hash_function(new_size, b->array[i]);
+            idx = hash_function(new_size, b->array[i].original_index);
             // If this config doesnt work, return and pick a new size.
             if(new_occupied[idx]){
-                free(new_array);
-                free(new_occupied);
-                return false;
+                idx = neighbour_availability(b, idx);
+                if(idx == -1){
+                    printf("Reallocation Failed (%i)\n", new_size);
+                    free(new_array);
+                    free(new_occupied);
+                    return false;
+                }
+                
             }
 
             if(idx > max_idx){
                 max_idx = idx;
             }
-            new_array[idx] = b->array[i];
+            new_array[idx].value = b->array[i].value;
+            new_array[idx].original_index = b->array[i].original_index;   
             new_occupied[idx] = true;
         }
     }
+    printf("Reallocation Successful (%i)\n", new_size);
     free(b->array);
     free(b->occupied);
     b->array = new_array;
@@ -130,6 +128,7 @@ void bsa_resize(bsa* b, int new_size){
     do
     {
         // Increment new size until feasible configuration found
+        // this isnt accounting for duplicate inputs 
         new_size++;
         feasible = bsa_reallocate(b, new_size);
     } while (!feasible);
@@ -145,37 +144,38 @@ SET
 bool bsa_set(bsa* b, int indx, int d){
 
     bool used;
+    int hash;
 
     do
     {
-        indx = hash_function(b->length, d);
-        //printf("\n");
-        //printf("Value: %i\n", d);
-        //printf("Hash Index: %i\n", indx);
-        used = b->occupied[indx];
+        hash = hash_function(b->length, indx);
+
+        used = b->occupied[hash];
 
         
         if(used){
             
-            indx = neighbour_availability(b, indx);
-            used = b->occupied[indx];
-            //printf("Used Index: %i\n", indx);
-            if(indx == UNAVAILABLE){
-                //printf("Resizing (set)\n");
+            hash = neighbour_availability(b, hash);
+            
+            if(hash == UNAVAILABLE){
+                printf("No avaialble cell.\n");
                 bsa_resize(b, b->length);
+                hash = neighbour_availability(b, hash);
             }
+            used = b->occupied[hash];
             
         }
         //printf("\n");
     } while(used);
 
 
-    b->array[indx] = d;
-    b->occupied[indx] = true;
+    b->array[hash].value = d;
+    b->array[hash].original_index = indx;
+    b->occupied[hash] = true;
     (b->elements)++;
 
-    if(indx>b->max_index){
-        b->max_index = indx;
+    if(hash>b->max_index){
+        b->max_index = hash;
     }
 
     float load_factor = (float)(b->elements)/(float)b->length;
@@ -305,17 +305,20 @@ void test(void){
 
     bsa* test_table  = bsa_init();
     for(int i = 0; i<INIT_SIZE; i++){
-        assert(!(test_table->array[i]));
+        assert(!(test_table->array[i].value));
+        assert(!(test_table->array[i].original_index));
         assert(!(test_table->occupied[i]));
     }
     assert(test_table->max_index == -1);
     assert(test_table->length == INIT_SIZE);
     assert(test_table->elements == 0);
 
-    assert(hash_function(INIT_SIZE, 3000) == 0);
-    assert(hash_function(INIT_SIZE, 3100) == 100);
+    assert(hash_function(INIT_SIZE, INIT_SIZE) == 0);
+    assert(hash_function(INIT_SIZE, (INIT_SIZE+100)) == 
+          (INIT_SIZE+100)%INIT_SIZE);
 
-    test_table->array[1] = 1;
+    test_table->array[1].value = 1;
+    test_table->array[1].original_index = 1;
     test_table->occupied[1] = true;
     assert(bsa_get(test_table, 1));
     assert(*(bsa_get(test_table, 1)) == 1);
@@ -323,43 +326,44 @@ void test(void){
 
 
     // Make table bigger
-    bsa_reallocate(test_table, INIT_SIZE*2);
+    bsa_reallocate(test_table, 2000);
     assert(bsa_get(test_table, 1));
     assert(*(bsa_get(test_table, 1)) == 1);
     assert(!(bsa_get(test_table, 0)));
-    assert(test_table->length == INIT_SIZE*2);
-    test_table->array[1500] = 1500;
+    assert(test_table->length == 2000);
+    test_table->array[1500].value = 1500;
+    test_table->array[1500].original_index = 1500;
     test_table->occupied[1500] = true;
     assert(bsa_get(test_table, 1500));
     assert(*(bsa_get(test_table, 1500)) == 1500);
     assert(!(bsa_get(test_table, 1499)));
 
-    // Make table smaller (original size)
-    bsa_reallocate(test_table, INIT_SIZE);
+    // Make table smaller & see if hashing updates
+    bsa_reallocate(test_table, 1000);
     assert(bsa_get(test_table, 1));
     assert(*(bsa_get(test_table, 1)) == 1);
     assert(!(bsa_get(test_table, 0)));
-    assert(test_table->length == INIT_SIZE);
+    assert(test_table->length == 1000);
     //value 1500 should now be in cell 500...?
     assert(bsa_get(test_table, 500));
     assert(*(bsa_get(test_table, 500)) == 1500);
     assert(!(bsa_get(test_table, 499)));
     // Check out-of-bounds index
-    assert(!(bsa_get(test_table, (INIT_SIZE))));
+    assert(!(bsa_get(test_table, (1000))));
     // Resize should make it only 1 longer therefore
     //index 1000 (INIT_SIZE) should now be set to false.
     // with no sanitizer errors.
     bsa_resize(test_table, test_table->length);
-    assert(!test_table->occupied[INIT_SIZE]);
+    assert(!test_table->occupied[1000]);
 
-    bsa_set(test_table, 0, 1751);
+    bsa_set(test_table, 1751, 1751);
     assert(bsa_get(test_table, 750));
     assert(*(bsa_get(test_table, 750)) == 1751);
     assert(test_table->max_index == 750);
     assert(test_table->elements == 1);
 
     // Lets make sure this array can find the max_index again
-    bsa_reallocate(test_table, INIT_SIZE*2);
+    bsa_reallocate(test_table, 2000);
     assert(test_table->max_index == 1751);
     assert(test_table->length == 2000);
     assert(test_table->elements == 1);
@@ -377,8 +381,8 @@ void test(void){
     bsa_foreach(count_elem, test_table, &acc);
 
     assert(acc = test_table->elements);
-    assert(test_table->array[1] == 
-           test_table->array[test_table->max_index]);
+    assert(test_table->array[1].value == 
+           test_table->array[test_table->max_index].value);
            
     // Tried testing against sieve, fibmemo and isfactoria,
     // the last 2 put non-unique values into the list,

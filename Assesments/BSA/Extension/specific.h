@@ -1,14 +1,21 @@
 #include "../bsa.h"
-#define INIT_SIZE 1000
+#define INIT_SIZE 50
 #define RESIZE_FACTOR 1.5
 #define UPPER_LOAD_FACTOR 0.75
 #define NEIGHBOURHOOD 3
 #define UNAVAILABLE -1
 
+struct bsa_cell
+{
+    int value;
+    int original_index;
+};
+
+typedef struct bsa_cell bsa_cell;
 
 struct bsa
 {
-    int* array;
+    bsa_cell* array;
     bool* occupied;
     int max_index;
     int length;

@@ -44,10 +44,13 @@ should be addressed is the allocation of memory, where the row_creation function
 has a complexity of O(log(n)). 
 
 Since the type of storage at hand is series of mostly unique integers, a hash table is a very appropriate method of storage,
-futhermore, hashing lends itself very nicely to reducing computational complexity. 
+futhermore, hashing lends itself very nicely to reducing computational complexity. However, normal hasing where one hashes by
+value wouldn't be appropriate here as the test functions (sieve, isfactorial & fibmemo) all use index geometry to calculate new
+values. Therefore we need to hash by insertion index so when we need to know the 3rd number in the fibmemo series for example,
+we can access it by hashing index 2. This will also allow bsa_get() to work more effectively, accessing the correct values. 
 
-The chosen hash function was a simple one, for a value 'x', the index was given by:
-index = x % table_length.
+The chosen hash function was a simple one, for a value sent ot index 'i', the index was given by:
+hash_index = i % table_length.
 
 Collisions were dealt with using a neighbourhood system, i.e, when a collision occured, the incoming value was inserted in the closest 
 cell up to +-3 cells away. If no cells are avaialble within this area, a reallocation is triggered, where the new list size is 1 higher

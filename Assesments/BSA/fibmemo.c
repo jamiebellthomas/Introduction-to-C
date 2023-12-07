@@ -7,7 +7,7 @@ int fib_memo(bsa* b, int n);
 // Use memoisation to speed-up recursive Fibonacci
 int main(void)
 {
-   test();
+   //test();
    bsa* b = bsa_init();
    bsa_set(b,1, 1);
    bsa_set(b,2, 1);
@@ -15,9 +15,7 @@ int main(void)
    for(int i=1; i<=MAXFIB; i++){
       printf("%d => %d\n", i, fib_memo(b, i));
    }
-   char str[1000];
-   bsa_tostring(b, str);
-   printf("%s", str);
+   printf("max index used:%i\n", bsa_maxindex(b));
    bsa_free(b);
    return 0;
 }

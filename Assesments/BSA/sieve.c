@@ -10,7 +10,7 @@ int next_factor(bsa* b, int p);
 // https://oeis.org/A000959
 int main(void)
 {
-   test();
+   //test();
    bsa* b = bsa_init();
    for(int i=2; i<=MAX; i++){
       assert(bsa_set(b,i,i));
@@ -23,6 +23,7 @@ int main(void)
       }
    }
    bsa_foreach(print, b, &p);
+   bsa_free(b);
    return 0;
    
 }

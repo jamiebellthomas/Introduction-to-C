@@ -3,7 +3,7 @@ COMMON= -Wall -Wextra -Wfloat-equal -Wpedantic -Wvla -std=c99 -Werror
 DEBUG= -g3
 SANITIZE= $(COMMON) -fsanitize=undefined -fsanitize=address $(DEBUG)
 VALGRIND= $(COMMON) $(DEBUG)
-PRODUCTION= $(COMMON) -O3
+PRODUCTION= $(COMMON) -pg
 
 all: driverbsa_s driverbsa fibmemo sieve_s isfactorial # extfibmemo_s
 
@@ -27,11 +27,9 @@ extfibmemo_s: bsa.h Extension/specific.h Extension/extension.c fibmemo.c
 	$(CC) fibmemo.c Extension/extension.c -o extfibmemo_s -I./Extension $(SANITIZE)
 
 run: driverbsa driverbsa_s fibmemo sieve_s isfactorial # extfibmemo_s
-	./driverbsa_s
 	./isfactorial
 	./fibmemo
 	./sieve_s
-	#./extfibmemo_s
 
 clean:
 	rm -f driverbsa_s driverbsa fibmemo extfibmemo_s isfactorial sieve_s
@@ -56,10 +54,28 @@ e_fibmemo: bsa.h Extension/specific.h Extension/extension.c fibmemo.c
 e_isfactorial: bsa.h Extension/specific.h Extension/extension.c isfactorial.c
 	$(CC) isfactorial.c Extension/extension.c -o e_isfactorial -I./Extension $(PRODUCTION)
 
-e_sieve_s: bsa.h Extension/specific.h Extension/extension.c sieve.c
-	$(CC) sieve.c Extension/extension.c -o e_sieve_s -I./Extension $(PRODUCTION)
+e_sieve: bsa.h Extension/specific.h Extension/extension.c sieve.c
+	$(CC) sieve.c Extension/extension.c -o e_sieve -I./Extension $(PRODUCTION)
+##################
+e_fibmemo_s: bsa.h Extension/specific.h Extension/extension.c fibmemo.c
+	$(CC) fibmemo.c Extension/extension.c -o e_fibmemo_s -I./Extension $(SANITIZE)
 
-e_run: e_fibmemo e_sieve_s e_isfactorial # extfibmemo_s
+e_isfactorial_s: bsa.h Extension/specific.h Extension/extension.c isfactorial.c
+	$(CC) isfactorial.c Extension/extension.c -o e_isfactorial_s -I./Extension $(SANITIZE)
+
+e_sieve_s: bsa.h Extension/specific.h Extension/extension.c sieve.c
+	$(CC) sieve.c Extension/extension.c -o e_sieve_s -I./Extension $(SANITIZE)
+
+
+e_run: e_fibmemo e_sieve e_isfactorial # extfibmemo_s
 	./e_isfactorial
 	./e_fibmemo
+	./e_sieve
+
+e_run_s: e_fibmemo_s e_sieve_s e_isfactorial_s # extfibmemo_s
+	./e_isfactorial_s
+	./e_fibmemo_s
 	./e_sieve_s
+
+e_clean:
+	rm -f e_fibmemo e_sieve e_isfactorial e_fibmemo_s e_sieve_s e_isfactorial_s e_driverbsa_s e_driverbsa extension

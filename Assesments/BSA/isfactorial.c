@@ -7,7 +7,7 @@ void printfacts(int* p, int* n);
 // https://oeis.org/A000142/list
 int main(void)
 {
-   test();
+   //test();
    int i;
    bsa* b = bsa_init();
    for(i=0; i<500000000; i++){
@@ -18,11 +18,13 @@ int main(void)
    // Sometime later, look-up factorials
    printf("Printing all factorials\n");
    bsa_foreach(printfacts, b, &i);
+   bsa_free(b);
    return 0;
 }
 
 void storefactorial(bsa* b, int f)
 {
+
    if(f<2){
       bsa_set(b, 1, 1);
       return;
@@ -35,6 +37,8 @@ void storefactorial(bsa* b, int f)
       }
       tf/=n;
       n++;
+
+
    }while(tf>1); 
    bsa_set(b, f, f);
    return;
