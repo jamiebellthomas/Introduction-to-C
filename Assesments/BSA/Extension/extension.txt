@@ -33,3 +33,7 @@ bsa_foreach() O(n)
         -> col_index() O(1) 
             -> pointer_index() O(log(n))
         -> used_cell() O(1)
+
+
+We're going to make a hash function. Since this is simple an array of integers the hash function should be relatively simple
+
