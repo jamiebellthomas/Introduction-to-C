@@ -35,3 +35,31 @@ run: driverbsa driverbsa_s fibmemo sieve_s isfactorial # extfibmemo_s
 
 clean:
 	rm -f driverbsa_s driverbsa fibmemo extfibmemo_s isfactorial sieve_s
+
+extension: bsa.h Extension/specific.h Extension/extension.c driver.c
+	$(CC) driver.c Extension/extension.c -o extension $(PRODUCTION)
+
+extension_s: bsa.h driver.c Extension/specific.h Extension/extension.c
+	$(CC) driver.c extension.c -o extension_s $(SANITIZE)
+
+e_all: e_driverbsa_s e_driverbsa e_fibmemo e_sieve_s e_isfactorial # extfibmemo_s
+
+e_driverbsa_s: bsa.h Extension/specific.h Extension/extension.c
+	$(CC) driver.c Extension/extension.c -o e_driverbsa_s -I./Extension $(SANITIZE)
+
+e_driverbsa: bsa.h Extension/specific.h Extension/extension.c
+	$(CC) driver.c Extension/extension.c -o e_driverbsa -I./Extension $(PRODUCTION)
+
+e_fibmemo: bsa.h Extension/specific.h Extension/extension.c fibmemo.c
+	$(CC) fibmemo.c Extension/extension.c -o e_fibmemo -I./Extension $(PRODUCTION)
+
+e_isfactorial: bsa.h Extension/specific.h Extension/extension.c isfactorial.c
+	$(CC) isfactorial.c Extension/extension.c -o e_isfactorial -I./Extension $(PRODUCTION)
+
+e_sieve_s: bsa.h Extension/specific.h Extension/extension.c sieve.c
+	$(CC) sieve.c Extension/extension.c -o e_sieve_s -I./Extension $(PRODUCTION)
+
+e_run: e_fibmemo e_sieve_s e_isfactorial # extfibmemo_s
+	./e_isfactorial
+	./e_fibmemo
+	./e_sieve_s

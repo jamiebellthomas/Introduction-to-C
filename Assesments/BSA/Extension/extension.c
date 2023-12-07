@@ -1,9 +1,5 @@
 #include "specific.h"
 
-int main(void){
-    test();
-}
-
 /*
 ----------
 INITIALISE
@@ -58,9 +54,9 @@ free DONE + TESTED
 has function DONE + TESTED
 set DONE + TESTED
 get DONE + TESTED
-delete
-maxindex
-foreach
+delete DONE + TESTED
+maxindex DONE + TESTED
+foreach DONE + TESTED
 
 we'll also need a reallocate function, this will sit in the set function
 */
@@ -117,6 +113,7 @@ bool bsa_reallocate(bsa* b, int new_size){
     b->max_index = max_idx;
     b->length = new_size;
 
+
     
 
     return true;
@@ -152,10 +149,15 @@ bool bsa_set(bsa* b, int indx, int d){
     do
     {
         indx = hash_function(b->length, d);
+        printf("\n");
+        printf("Index: %i\n", indx);
         used = b->occupied[indx];
+        printf("Used: %i\n", indx);
         if(used){
+            printf("Resizing (set)\n");
             bsa_resize(b, b->length);
         }
+        printf("\n");
     } while(used);
 
 
@@ -179,6 +181,12 @@ bool bsa_set(bsa* b, int indx, int d){
 
 }
 
+/*
+---------
+MAX INDEX
+---------
+*/
+
 int bsa_maxindex(bsa* b){
     if(!b){
         return -1;
@@ -186,6 +194,101 @@ int bsa_maxindex(bsa* b){
 
     return b->max_index;
 }
+
+/*
+------
+DELETE
+------
+*/
+
+void next_maxindex(bsa* b, int idx){
+
+    do{
+        idx--;
+    } while (!(bsa_get(b, idx)) &&
+        idx >= 0);
+
+    b->max_index = idx;
+}
+
+bool bsa_delete(bsa* b, int indx){
+
+    indx = hash_function(b->length, indx);
+
+    if(!(bsa_get(b,indx))){
+        return false;
+    }
+
+    b->occupied[indx] = false;
+    (b->elements)--;
+    
+    if(b->elements == 0){
+        b->max_index = -1;
+        return true;
+    }
+
+    if(indx == b->max_index){
+        next_maxindex(b,indx);
+    }
+
+    return true;
+
+
+    
+
+    
+}
+
+/*
+--------
+FOR EACH
+--------
+*/
+
+void bsa_foreach(void (*func)(int* p, int* n), bsa* b, int* acc){
+
+    if(!b || !func){
+        return;
+    }
+    int* val;
+    for(int i = 0; i <= b->max_index; i++){
+        val = bsa_get(b, i);
+        if(val){
+            func(val, acc);
+        }          
+    }
+}
+
+void count_elem(int* p, int* n){
+    (*n)++;
+    (*p)=2;
+}
+
+/*
+---------------
+NEIGHBOUR CHECK
+---------------
+*/
+/*
+This function goes +-3 either side of an index, if/when
+it finds an avaiable cell it returns its index
+If it doesnt find one, it returns -1
+*/
+int neighbour_availability(bsa* b, int indx){
+
+    for(int i = 1; i<=NEIGHBOURHOOD; i++){
+        if(((indx+i) < b->length) && !(b->occupied[indx+i])){
+            return indx+1;
+        }
+
+        if(((indx-i) >= 0) && !(b->occupied[indx-i])){
+            return indx-1;
+        }
+    }
+
+    return -1;
+}
+
 
 
 void test(void){
@@ -252,6 +355,29 @@ void test(void){
     assert(test_table->elements == 1);
 
     assert(bsa_maxindex(test_table) == 1751);
+    // Manually update the element count as the first 2
+    // elements weren't added via bsa_set().
+    test_table->elements = 3;
+    bsa_delete(test_table, test_table->max_index);
+    assert(test_table->elements == 2);
+    assert(test_table->max_index == 1500);
+
+    int acc = 0;
+    // count_elem() is trivial, no need to test.
+    bsa_foreach(count_elem, test_table, &acc);
+
+    assert(acc = test_table->elements);
+    assert(test_table->array[1] == 
+           test_table->array[test_table->max_index]);
+           
+    // Tried testing against sieve, fibmemo and isfactoria,
+    // the last 2 put non-unique values into the list,
+    // this triggers an infinite loop in bsa_set with current
+    // implementation. 
+
+    // Going to set up a neighbours system
+
+    assert(neighbour_availability(test_table, 1) == 2);
     
 
 
