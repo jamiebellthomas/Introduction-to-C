@@ -53,8 +53,11 @@ int hash_function(int len, int d){
 
 /*
 We need functions to:
-set
-get
+init DONE + TESTED
+free DONE + TESTED
+has function DONE + TESTED
+set DONE + TESTED
+get DONE + TESTED
 delete
 maxindex
 foreach
@@ -123,7 +126,7 @@ bool bsa_reallocate(bsa* b, int new_size){
 
 }
 // This function will use bsa_reallocate to find the closest
-// feasible size above a given size (new_size)
+// feasible size ABOVE a given size (new_size)
 void bsa_resize(bsa* b, int new_size){
     bool feasible = false;
 
@@ -174,6 +177,14 @@ bool bsa_set(bsa* b, int indx, int d){
     return true;
 
 
+}
+
+int bsa_maxindex(bsa* b){
+    if(!b){
+        return -1;
+    }
+
+    return b->max_index;
 }
 
 
@@ -239,6 +250,8 @@ void test(void){
     assert(test_table->max_index == 1751);
     assert(test_table->length == 2000);
     assert(test_table->elements == 1);
+
+    assert(bsa_maxindex(test_table) == 1751);
     
 
 
