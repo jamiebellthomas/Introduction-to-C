@@ -68,7 +68,7 @@ GET
 ---
 */
 int* bsa_get(bsa* b, int indx){
-    if((indx > b->length) || !(b->occupied[indx])){
+    if((indx >= b->length) || !(b->occupied[indx])){
         return NULL;
     }
 
@@ -129,6 +129,7 @@ void bsa_resize(bsa* b, int new_size){
 
     do
     {
+        // Increment new size until feasible configuration found
         new_size++;
         feasible = bsa_reallocate(b, new_size);
     } while (!feasible);
@@ -144,7 +145,6 @@ SET
 bool bsa_set(bsa* b, int indx, int d){
 
     bool used;
-    int increment = 0;
 
     do
     {
@@ -157,16 +157,16 @@ bool bsa_set(bsa* b, int indx, int d){
 
 
     b->array[indx] = d;
-    b->occupied = true;
+    b->occupied[indx] = true;
     (b->elements)++;
 
     if(indx>b->max_index){
         b->max_index = indx;
     }
 
-    float load_factor = (b->elements)/b->length;
+    float load_factor = (float)(b->elements)/(float)b->length;
     if(load_factor>UPPER_LOAD_FACTOR){
-        bsa_reallocate(b, (b->length)*RESIZE_FACTOR);
+        bsa_resize(b, (((b->length)*RESIZE_FACTOR)-1));
     }
 
 
@@ -221,7 +221,31 @@ void test(void){
     assert(*(bsa_get(test_table, 500)) == 1500);
     assert(!(bsa_get(test_table, 499)));
     // Check out-of-bounds index
-    assert(!(bsa_get(test_table, (INIT_SIZE+1))));
+    assert(!(bsa_get(test_table, (INIT_SIZE))));
+    // Resize should make it only 1 longer therefore
+    //index 1000 (INIT_SIZE) should now be set to false.
+    // with no sanitizer errors.
+    bsa_resize(test_table, test_table->length);
+    assert(!test_table->occupied[INIT_SIZE]);
+
+    bsa_set(test_table, 0, 1751);
+    assert(bsa_get(test_table, 750));
+    assert(*(bsa_get(test_table, 750)) == 1751);
+    assert(test_table->max_index == 750);
+    assert(test_table->elements == 1);
+
+    // Lets make sure this array can find the max_index again
+    bsa_reallocate(test_table, INIT_SIZE*2);
+    assert(test_table->max_index == 1751);
+    assert(test_table->length == 2000);
+    assert(test_table->elements == 1);
+    
+
+
+
+
+
+
 
 
 
