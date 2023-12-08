@@ -1,6 +1,6 @@
 #include "bsa.h"
 
-#define MAX 271
+#define MAX 10000
 
 void print(int* p, int* n);
 int next_factor(bsa* b, int p);

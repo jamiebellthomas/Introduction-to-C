@@ -1,5 +1,6 @@
-My primary aim with this piece of work is to reduce the computaitonal complexity, without utilising a vast amount of unneccessary
-memory. let's start of by looking at the big O complexities of each of the functions used in the main secion of this CW. 
+My primary aim with this piece of work is to reduce the computaitonal complexity, and therefore the runtime,
+without utilising a vast amount of unneccessary memory. Let's start of by looking at the big O complexities 
+of each of the functions used in the main secion of this CW. 
 
 Current complexities of my implementation of BSA methods:
 
@@ -39,9 +40,9 @@ bsa_foreach():  O(n) - Always O(n) as it loops through all elements
         -> used_cell() O(1)
 
 Overall, it is a somewhat efficient method. I feel there is alot of time wasted with the identification of row and column
-indicies. Since this function is called far more than any other, this should be optimised as a priority. Other functions that
-should be addressed is the allocation of memory, where the row_creation function has a complexity of O(n), and table initialisation
-has a complexity of O(log(n)). 
+indicies. As the main method of retrieving values, this function is called far more than any other, this should be optimised as 
+a priority. Other functions that should be addressed is the allocation of memory, where the row_creation function has a 
+complexity of O(n), and table initialisation has a complexity of O(log(n)). 
 
 Since the type of storage at hand is series of mostly unique integers, a hash table is a very appropriate method of storage,
 futhermore, hashing lends itself very nicely to reducing computational complexity. However, normal hasing where one hashes by
@@ -53,13 +54,14 @@ The chosen hash function was a simple one, for a value sent ot index 'i', the in
 hash_index = i % table_length.
 
 Collisions were dealt with using a neighbourhood system, i.e, when a collision occured, the incoming value was inserted in the closest 
-cell up to +-3 cells away. If no cells are avaialble within this area, a reallocation is triggered, where the new list size is 1 higher
+cell up to +-3 cells away (this value can be adjusted though). If no cells are avaialble within this area, a reallocation is triggered, 
+where the new list size is 1 higher
 
-This reallocation and rehashing should resolve all conflicts. This process is repeated until all values and the new incoming value can 
+This reallocation and rehashing should resolve all conflicts. This process is repeated until all current values and the new incoming value can 
 fit into the array. 
 
 While this can potentially lead to overly-frequent reallocations and rehashing, the small nature of the data set makes this eventuality 
-unlikely. There is an additional reallocation claused added into the bsa_set() function, where if the array load factor (percentage filled)
+unlikely. There is an additional reallocation claused added into the bsa_set() function, where if the array load factor (portion filled)
 exceeds 0.75, the array is reallocated to a size 1.5 times bigger, so that the load factor goes down to 0.5. The upper limit of 0.75 was chosen
 as online reasearch showed that beyond this point, collision avoidance starts to significantly effect the efficiency of the algorithm. 
 
@@ -74,7 +76,7 @@ bsa_set(): Mostly O(1), unless a reallocation is triggered, then O(n)
     -> hash_function() O(1)
 --
 bsa_get(): O(1)
-
+    -> hash_function() O(1)
 --
 bsa_delete() - Mostly O(1), unless largest index is removed, then O(n) 
     -> hash_function() O(1)
@@ -89,12 +91,26 @@ bsa_free() O(1)
 bsa_foreach() O(n) - Always O(n) as it loops through all elements
     -> bsa_get() O(1)
 
-Comparing the 2 tables, the hashing method is far less computationally 
-complex. Let's see if this is reflected at runtime and if the 
-reallocation significantly detriments performance.
+Comparing the 2 tables, the hashing method is far less computationally complex. Let's see if this is reflected at runtime and if the 
+reallocation significantly detriments performance. To strike a balance between saving memory while preventing unneccessary reallocations
+a moderate initial table size of 50 was chosen. 
 
+I decided to run a profiler to comare the algorithms for each of the 3 scripts. The time results were collected:
 
+Script        |    Time  |  
+sieve         |   0.004  |       
+isfactorial   |   12.26  |
+fibmemo       |   0.004  |
 
+e_sieve       |   0.003  |
+e_isfactorial |   2.301  |
+e_fibmemo     |   0.003  |
+
+It was hard to differentiate between the 2 methods for sieve and fibmemo scripts as they were relatively simple to begin with.
+However for the isfactorial script, there was a clear improvment. This can be explained by their respective profiles. In the
+original BSA method, the two main functions called, accounting for 57% of function calls, were pointer_index() (O(log(n))) and
+bsa_row_create() (O(n)), whereas in the hash array, the primary function called, accounting for 84% of function calls was
+bsa_get (O(1)). This explains the significantly lower runtime. and shows that the reallocation did not effect overall performance.
 
 
 

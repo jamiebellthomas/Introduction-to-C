@@ -72,7 +72,7 @@ REALLOCATE
 // This changes the size of the hash table, returns true if ALL values were
 // reallocated sucessfully, and false if not.
 bool bsa_reallocate(bsa* b, int new_size){
-    // THESE NEEDS MODULARISING
+
     printf("Realloc function call (%i)\n", new_size);
     int idx, max_idx = 0;
     
@@ -111,13 +111,7 @@ bool bsa_reallocate(bsa* b, int new_size){
     b->max_index = max_idx;
     b->length = new_size;
 
-
-    
-
     return true;
-
-
-
 
 }
 // This function will use bsa_reallocate to find the closest
@@ -183,11 +177,7 @@ bool bsa_set(bsa* b, int indx, int d){
         bsa_resize(b, (((b->length)*RESIZE_FACTOR)-1));
     }
 
-
-
     return true;
-
-
 }
 
 /*

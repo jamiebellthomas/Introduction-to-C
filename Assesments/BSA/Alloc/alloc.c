@@ -294,13 +294,10 @@ bool used_cell(bsa* b, int row_idx, int col_idx){
 }
 
 void next_maxindex(bsa* b, int idx){
-    int row_idx = pointer_index(idx), col_idx = col_index(idx);
 
     do{
         idx--;
-        row_idx = pointer_index(idx);
-        col_idx = col_index(idx);
-    } while (!(used_cell(b, row_idx, col_idx)) &&
+    } while (!(bsa_get(b, idx)) &&
         idx >= 0);
 
     b->max_index = idx;

@@ -5,17 +5,14 @@ Each sample counts as 0.01 seconds.
 
   %   cumulative   self              self     total           
  time   seconds   seconds    calls  Ts/call  Ts/call  name    
-  0.00      0.00     0.00     2882     0.00     0.00  hash_function
-  0.00      0.00     0.00     1657     0.00     0.00  bsa_get
-  0.00      0.00     0.00      458     0.00     0.00  bsa_delete
-  0.00      0.00     0.00      270     0.00     0.00  bsa_set
+  0.00      0.00     0.00     2549     0.00     0.00  bsa_set
+  0.00      0.00     0.00     1270     0.00     0.00  bsa_reallocate
+  0.00      0.00     0.00     1000     0.00     0.00  test
+  0.00      0.00     0.00      270     0.00     0.00  bsa_delete
+  0.00      0.00     0.00      212     0.00     0.00  count_elem
+  0.00      0.00     0.00       59     0.00     0.00  bsa_init
   0.00      0.00     0.00       59     0.00     0.00  next_factor
-  0.00      0.00     0.00       58     0.00     0.00  print
-  0.00      0.00     0.00        5     0.00     0.00  bsa_reallocate
-  0.00      0.00     0.00        5     0.00     0.00  bsa_resize
-  0.00      0.00     0.00        1     0.00     0.00  bsa_foreach
-  0.00      0.00     0.00        1     0.00     0.00  bsa_free
-  0.00      0.00     0.00        1     0.00     0.00  bsa_init
+  0.00      0.00     0.00        1     0.00     0.00  hash_function
 
  %         the percentage of the total running time of the
 time       program used by this function.
@@ -56,55 +53,47 @@ notice and this notice are preserved.
 granularity: each sample hit covers 4 byte(s) no time propagated
 
 index % time    self  children    called     name
-                0.00    0.00     270/2882        bsa_set [4]
-                0.00    0.00     458/2882        bsa_delete [3]
-                0.00    0.00     497/2882        bsa_reallocate [7]
-                0.00    0.00    1657/2882        bsa_get [2]
-[1]      0.0    0.00    0.00    2882         hash_function [1]
+[1]      0.0    0.00    0.00     999+2820    <cycle 1 as a whole> [1]
+                0.00    0.00    2549+1270        bsa_set <cycle 1> [2]
+                0.00    0.00    1270             bsa_reallocate <cycle 1> [3]
 -----------------------------------------------
-                0.00    0.00     270/1657        next_factor [5]
-                0.00    0.00     272/1657        bsa_foreach [9]
-                0.00    0.00     458/1657        bsa_delete [3]
-                0.00    0.00     657/1657        bsa_reallocate [7]
-[2]      0.0    0.00    0.00    1657         bsa_get [2]
-                0.00    0.00    1657/2882        hash_function [1]
+                                1270             bsa_set <cycle 1> [2]
+                                2548             bsa_reallocate <cycle 1> [3]
+                0.00    0.00       1/999         next_factor [8]
+[2]      0.0    0.00    0.00    2549+1270    bsa_set <cycle 1> [2]
+                0.00    0.00      58/59          bsa_init [7]
+                                 272             bsa_reallocate <cycle 1> [3]
+                                1270             bsa_set <cycle 1> [2]
 -----------------------------------------------
-                0.00    0.00     458/458         main [19]
-[3]      0.0    0.00    0.00     458         bsa_delete [3]
-                0.00    0.00     458/2882        hash_function [1]
-                0.00    0.00     458/1657        bsa_get [2]
+                                 272             bsa_set <cycle 1> [2]
+                0.00    0.00     270/999         print [23]
+                0.00    0.00     728/999         main [20]
+[3]      0.0    0.00    0.00    1270         bsa_reallocate <cycle 1> [3]
+                0.00    0.00    1000/1000        test [4]
+                0.00    0.00     270/270         bsa_delete [5]
+                0.00    0.00     212/212         count_elem [6]
+                                2548             bsa_set <cycle 1> [2]
 -----------------------------------------------
-                0.00    0.00     270/270         main [19]
-[4]      0.0    0.00    0.00     270         bsa_set [4]
-                0.00    0.00     270/2882        hash_function [1]
-                0.00    0.00       5/5           bsa_resize [8]
+                0.00    0.00    1000/1000        bsa_reallocate <cycle 1> [3]
+[4]      0.0    0.00    0.00    1000         test [4]
 -----------------------------------------------
-                0.00    0.00      59/59          main [19]
-[5]      0.0    0.00    0.00      59         next_factor [5]
-                0.00    0.00     270/1657        bsa_get [2]
+                0.00    0.00     270/270         bsa_reallocate <cycle 1> [3]
+[5]      0.0    0.00    0.00     270         bsa_delete [5]
 -----------------------------------------------
-                0.00    0.00      58/58          bsa_foreach [9]
-[6]      0.0    0.00    0.00      58         print [6]
+                0.00    0.00     212/212         bsa_reallocate <cycle 1> [3]
+[6]      0.0    0.00    0.00     212         count_elem [6]
 -----------------------------------------------
-                0.00    0.00       5/5           bsa_resize [8]
-[7]      0.0    0.00    0.00       5         bsa_reallocate [7]
-                0.00    0.00     657/1657        bsa_get [2]
-                0.00    0.00     497/2882        hash_function [1]
+                0.00    0.00       1/59          main [20]
+                0.00    0.00      58/59          bsa_set <cycle 1> [2]
+[7]      0.0    0.00    0.00      59         bsa_init [7]
 -----------------------------------------------
-                0.00    0.00       5/5           bsa_set [4]
-[8]      0.0    0.00    0.00       5         bsa_resize [8]
-                0.00    0.00       5/5           bsa_reallocate [7]
+                0.00    0.00      59/59          main [20]
+[8]      0.0    0.00    0.00      59         next_factor [8]
+                0.00    0.00       1/999         bsa_set <cycle 1> [2]
+                0.00    0.00       1/1           hash_function [9]
 -----------------------------------------------
-                0.00    0.00       1/1           main [19]
-[9]      0.0    0.00    0.00       1         bsa_foreach [9]
-                0.00    0.00     272/1657        bsa_get [2]
-                0.00    0.00      58/58          print [6]
------------------------------------------------
-                0.00    0.00       1/1           main [19]
-[10]     0.0    0.00    0.00       1         bsa_free [10]
------------------------------------------------
-                0.00    0.00       1/1           main [19]
-[11]     0.0    0.00    0.00       1         bsa_init [11]
+                0.00    0.00       1/1           next_factor [8]
+[9]      0.0    0.00    0.00       1         hash_function [9]
 -----------------------------------------------
 
  This table describes the call tree of the program, and was sorted by
@@ -197,7 +186,6 @@ notice and this notice are preserved.
 
 Index by function name
 
-   [3] bsa_delete             [11] bsa_init                [1] hash_function
-   [9] bsa_foreach             [7] bsa_reallocate          [5] next_factor
-  [10] bsa_free                [8] bsa_resize              [6] print
-   [2] bsa_get                 [4] bsa_set
+   [5] bsa_delete              [2] bsa_set                 [8] next_factor
+   [7] bsa_init                [6] count_elem              [4] test
+   [3] bsa_reallocate          [9] hash_function           [1] <cycle 1>
