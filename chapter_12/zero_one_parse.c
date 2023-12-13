@@ -31,3 +31,29 @@ int main(void){
     free(prog);
     return 0;
 }
+
+// This is step 1 of the grammar, assert it starts with BEGIN (else error)
+// If so proceed to Code function
+void Prog(Program* p){
+    if(strcmp("BEGIN", p->words[p->current_word])){
+        fprintf(stderr, "No BEGIN statement!");
+        exit(EXIT_FAILURE);
+    }
+
+    (p->current_word)++;
+    Code(p);
+}
+// This is the general body of the code, refer to the grammar,
+// Here the code either terminates or launches into a statement
+void Code(Program* p){
+    // First see if code is being terminated, if so return
+    if(strcmp("END", p->words[p->current_word])){
+        return;
+    }
+    // If code doesn't terminate, then what follows must be a statement
+    Statement(p);
+    (p->current_word)++;
+    // Then we recall Code (recursive) to see what happens next
+    Code(p);
+
+}

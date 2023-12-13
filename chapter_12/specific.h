@@ -6,6 +6,8 @@
 
 #define MAXTOKENS 100
 #define MAXTOKENSIZE 20
+
+
 /*
 Here prog is going to be the series of words we're reading.
 For this primative example, we're going to use a fixed size 2D array
@@ -20,5 +22,8 @@ struct prog
 };
 
 typedef struct prog Program;
+
+void Prog(Program* p);
+void Code(Program* p);
 
 
