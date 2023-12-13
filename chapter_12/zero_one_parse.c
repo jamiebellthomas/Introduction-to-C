@@ -26,6 +26,8 @@ int main(void){
     // Clever little 1 line while loop, reads words in until it cant anymore
     while(scanf("%s", prog->words[i++]) == 1 && i<MAXTOKENS);
 
+    Prog(prog);
+
     printf("Parsed OK!");
 
     free(prog);
@@ -47,7 +49,7 @@ void Prog(Program* p){
 // Here the code either terminates or launches into a statement
 void Code(Program* p){
     // First see if code is being terminated, if so return
-    if(strcmp("END", p->words[p->current_word])){
+    if(!strcmp("END", p->words[p->current_word])){
         return;
     }
     // If code doesn't terminate, then what follows must be a statement
@@ -56,4 +58,18 @@ void Code(Program* p){
     // Then we recall Code (recursive) to see what happens next
     Code(p);
 
+}
+
+void Statement(Program* p){
+    // See if statements are valid (bottom of the recurison)
+    if(!strcmp("ONE", p->words[p->current_word])){
+        return;
+    }
+
+    if(!strcmp("NOUGHT", p->words[p->current_word])){
+        return;
+    }
+
+    fprintf(stderr, "Invalid Statement");
+    exit(EXIT_FAILURE);
 }

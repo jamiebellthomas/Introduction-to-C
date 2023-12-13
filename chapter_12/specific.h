@@ -25,5 +25,6 @@ typedef struct prog Program;
 
 void Prog(Program* p);
 void Code(Program* p);
+void Statement(Program* p);
 
 
