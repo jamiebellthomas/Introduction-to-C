@@ -29,6 +29,8 @@ Program* prog_init(void){
     return prog;
 }
 
+
+
 void free_prog(Program* prog){
     
     for(int row = 0; row<prog->array_len; row++){
@@ -38,6 +40,43 @@ void free_prog(Program* prog){
     free(prog);
 }
 
+
+
+
+bool valid_letter(Program* prog){
+    // If string in this word is more than 1 long, more than a single
+    // letter is present, return false.
+    if(strlen(prog->word_array[prog->current_word]) != 1){
+        return false;
+    }
+
+
+}
+
+
+bool valid_variable(Program* prog){
+    
+}
+
+bool valid_number(Program* prog){
+    
+}
+
+bool varnum(Program* prog){
+    
+}
+
+bool valid_word(Program* prog){
+    
+}
+
+bool valid_item(Program* prog){
+    
+}
+
+bool valid_op(Program* prog){
+    
+}
 
 
 
