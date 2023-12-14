@@ -7,8 +7,8 @@ PRODUCTION= $(COMMON) -O3
 
 all: parse_s interp_s
 
-parse_s: Parse/parse.h Parse/parse.c
-	$(CC) Parse/parse.c -o parse_s -I./Parse $(SANITIZE) -lm
+parse: Parse/parse.h Parse/parse.c Parse/driver.c
+	$(CC) Parse/driver.c Parse/parse.c -o parse_s -I./Parse $(SANITIZE) -lm
 
 interp_s: Interp/interp.h Interp/interp.c neillsimplescreen.c neillsimplescreen.h
 	$(CC) neillsimplescreen.c Interp/interp.c -o interp_s -I./Interp $(SANITIZE) -lm

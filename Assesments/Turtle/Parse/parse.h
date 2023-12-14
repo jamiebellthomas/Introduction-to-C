@@ -14,3 +14,5 @@ struct prog {
 };
 
 typedef struct prog Program;
+
+void test(void);
